@@ -1,0 +1,16 @@
+.text {
+	padding-top: 10px;
+	font-weight: bold;
+	font-family: sans-serif;
+	color: #162328;
+	align-items: center;
+}
+
+.labels {
+	font-weight: bold;
+}
+
+.submit-button {
+	text-decoration: none;
+	color: white;
+}

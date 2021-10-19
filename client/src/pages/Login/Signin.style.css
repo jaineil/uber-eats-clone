@@ -1,0 +1,15 @@
+.login-page {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+.form-box {
+	/* height: 650px; */
+	background-color: white;
+	box-shadow: 0px 0px 30px -5px black;
+	width: fit-content;
+	height: fit-content;
+}

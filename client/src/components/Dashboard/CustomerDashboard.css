@@ -1,0 +1,13 @@
+.blackButton {
+	margin-right: "10px";
+	background-color: black;
+	border: black;
+	color: white;
+}
+
+.whiteButton {
+	margin-right: "10px";
+	background-color: whitesmoke;
+	border: black;
+	color: black;
+}
