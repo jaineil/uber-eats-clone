@@ -1,0 +1,41 @@
+{
+	"name": "uber-eats-clone",
+	"version": "2.0.0",
+	"description": "CMPE273 lab-2 @ SJSU - UberEats Clone",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "nodemon index.js",
+		"start": "nodemon --experimental-modules index.js"
+	},
+	"author": "Jaineil Mandavia",
+	"license": "ISC",
+	"dependencies": {
+		"cookie-parser": "^1.4.5",
+		"cors": "^2.8.5",
+		"express": "^4.17.1",
+		"express-session": "^1.17.2",
+		"mongoose": "^6.0.11",
+		"nodemon": "^2.0.13"
+	},
+	"devDependencies": {
+		"eslint": "^7.32.0",
+		"eslint-config-airbnb-base": "^14.2.1",
+		"eslint-plugin-import": "^2.25.2"
+	},
+	"keywords": [
+		"fullstack",
+		"backend",
+		"frontend",
+		"nodejs",
+		"expressjs",
+		"reactjs",
+		"redux",
+		"mysql",
+		"mongodb",
+		"graphql",
+		"kafka",
+		"aws"
+	]
+}
