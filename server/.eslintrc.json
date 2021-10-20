@@ -11,5 +11,27 @@
         "sourceType": "module"
     },
     "rules": {
+        "no-console": "off",
+        "no-tabs": [
+            "error",
+            {
+                "allowIndentationTabs": true
+            }
+        ],
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "prefer-destructuring": [
+            "error",
+            {
+                "object": false,
+                "array": false
+            }
+        ],
+        "import/extensions": [
+            "error",
+            "always"
+        ]
     }
 }
