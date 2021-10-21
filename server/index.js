@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import uri from './models/config/db.config.js';
+import customerRoutes from './routes/customer.routes.js';
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:3001', credentials: true }));
@@ -26,14 +27,16 @@ app.use(
 	}),
 );
 
+app.use(customerRoutes);
+
 try {
 	mongoose.connect(
 		uri,
-		{ useNewUrlParser: true, useUnifiedTopology: true },
+		{ useNewUrlParser: true, useUnifiedTopology: true, maxPoolSize: 500 },
 	);
 	console.log('Mongoose is connected!');
-	app.listen(3000, () => {
-		console.log('Server listening on port 3000');
+	app.listen(3001, () => {
+		console.log('Server listening on port 3001');
 	});
 } catch (err) {
 	console.error('Could not connect Mongoose => ', err);
