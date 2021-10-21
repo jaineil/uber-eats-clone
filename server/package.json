@@ -12,6 +12,8 @@
 	"author": "Jaineil Mandavia",
 	"license": "ISC",
 	"dependencies": {
+		"@babel/eslint-parser": "^7.15.8",
+		"babel-eslint": "^10.1.0",
 		"cookie-parser": "^1.4.5",
 		"cors": "^2.8.5",
 		"express": "^4.17.1",

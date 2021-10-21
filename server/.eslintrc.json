@@ -1,11 +1,16 @@
 {
     "env": {
         "browser": true,
-        "es2021": true
+        "es2021": true,
+        "es6": true
     },
     "extends": [
         "airbnb-base"
     ],
+    "parser": "babel-eslint",
+    "babelOptions": {
+        "configFile": "/server/babel.config.json"
+    },
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
