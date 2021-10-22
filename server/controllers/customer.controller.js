@@ -85,25 +85,28 @@ export class CustomerController {
     validateCustomerSignin = async (req, res) => {
         console.log(req.body);
         const validateCustomerSigninReqObj = {
-            customerId: req.body.customerId,
             emailId: req.body.emailId,
             password: req.body.password
         }
 
         try {
-            const response = await Customer.findById(validateCustomerSigninReqObj.customerId);
+            const response = await Customer.findOne({ emailId: validateCustomerSigninReqObj.emailId });
             console.log(JSON.stringify(response));
 
             if (response.password !== validateCustomerSigninReqObj.password) {
-                console.log('Error')
-                res.status(400).send({ validCredentials: false});
+                console.log('Password mismatch')
+                res.status(400).send({ validCredentials: false });
+                
             } else {
-                res.cookie("customerId", validateCustomerSigninReqObj.customerId, {
+                const customerId = response.id;
+                console.log(customerId);
+                console.log(typeof customerId)
+                res.cookie("customerId", customerId, {
                     maxAge: 3600000,
                     httpOnly: false,
                     path: "/"
                 })
-                req.session.user = validateCustomerSigninReqObj.customerId;
+                req.session.user = customerId;
 
                 res.status(200).send({
                     validCredentials: true
@@ -195,8 +198,25 @@ export class CustomerController {
 
         try {
             const response = await Customer.findById(customerId);
-            console.log(JSON.stringify(response.addresses));
-            res.status(200).send(response.addresses);
+            const fetchedAddresses = response.addresses;
+    
+            let addresses = [];
+            for (const addr of fetchedAddresses) {
+                addresses.push(
+                    {
+                        street: addr.street,
+                        apt: addr.apt,
+                        city: addr.city,
+                        zipcode: addr.zipcode,
+                        state: addr.state,
+                        country: addr.country,
+                        type: addr.type,
+                        id: addr.id
+                    }
+                );
+            };
+            console.log(JSON.stringify(addresses));
+            res.status(200).send(addresses);
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not fetch customer addressess');
