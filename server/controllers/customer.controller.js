@@ -1,6 +1,8 @@
 import Customer from '../models/customer.model.js'
 
 export class CustomerController {
+
+    // API - to create new customer on sign-up
     createCustomer = async (req, res) => {
         console.log(req.body);
         const createCustomerReqObj = {
@@ -34,10 +36,170 @@ export class CustomerController {
         try {
             const response = await newCustomer.save();
             console.log(JSON.stringify(response));
-            res.send(response);
+            res.status(200).send(response);
         } catch (err) {
             console.error('Error => ', err);
-            res.status(500).send('Could not create customer')
+            res.status(500).send('Could not create customer');
+        }
+    }
+
+    // API - to update customer details on profile page
+    updateCustomerMeta = async (req, res) => {
+        console.log(req.body);
+        const customerId = req.body.customerId;
+
+        const updateCustomerDetailsObj = {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            emailId: req.body.emailId,
+            password: req.body.password,
+            dob: req.body.dob,
+            contactNumber: req.body.contactNumber,
+            profileImg: req.body.img
+        };
+
+        const updateCustomerAddressObj = {
+            street: req.body.street,
+            apt: req.body.apt,
+            city: req.body.city,
+            zipcode: req.body.zipcode,
+            state: req.body.state,
+            country: req.body.country,
+            type: "default"
+        };
+
+        try {
+            await Customer.findByIdAndUpdate(
+                customerId,
+                { ...updateCustomerDetailsObj, $set: { "addresses.0": updateCustomerAddressObj } }
+            );
+           
+            res.status(200).send('Updated');
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not update customer profile');
+        }
+    }
+
+    // API - to validate customer's credentials on sign-in
+    validateCustomerSignin = async (req, res) => {
+        console.log(req.body);
+        const validateCustomerSigninReqObj = {
+            customerId: req.body.customerId,
+            emailId: req.body.emailId,
+            password: req.body.password
+        }
+
+        try {
+            const response = await Customer.findById(validateCustomerSigninReqObj.customerId);
+            console.log(JSON.stringify(response));
+
+            if (response.password !== validateCustomerSigninReqObj.password) {
+                console.log('Error')
+                res.status(400).send({ validCredentials: false});
+            } else {
+                res.cookie("customerId", validateCustomerSigninReqObj.customerId, {
+                    maxAge: 3600000,
+                    httpOnly: false,
+                    path: "/"
+                })
+                req.session.user = validateCustomerSigninReqObj.customerId;
+
+                res.status(200).send({
+                    validCredentials: true
+                })
+            }
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not validate customer');
+        }
+    }
+
+    // API - to fetch customer details for profile page (should take care of fetchCustomerDefaultLocation data)
+    fetchCustomerMeta = async (req, res) => {
+        console.log(req.params)
+        const customerId = req.params.customerId;
+
+        try {
+            const response = await Customer.findById(customerId);
+            console.log(JSON.stringify(response));
+            res.status(200).send(response);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch customer meta');
+        }
+    }
+
+    // API - to add a restaurant to favorites on dashboard page
+    addCustomerFavoriteRestaurant = async (req, res) => {
+        console.log(req.body);
+        const customerId = req.body.customerId;
+        const restaurantId = req.body.restaurantId;
+
+        try {
+            await Customer.findByIdAndUpdate(customerId, { $push: { "favoriteRestaurants": restaurantId } });
+            res.status(200).send("Added");
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not add favorite resto');
+        }
+    }
+
+    // API - to fetch all restaurants marked favorites by customer on favorites page
+    fetchCustomerFavorites = async (req, res) => {
+        console.log(req.params)
+        const customerId = req.params.customerId;
+
+        try {
+            const response = await Customer.findById(customerId);
+            console.log(JSON.stringify(response.favoriteRestaurants));
+            res.status(200).send(response.favoriteRestaurants);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch customer favortie restos');
+        }
+    }
+
+    // API - to add new/alternate customer address on checkout page
+    addAlternateCustomerAddress = async (req, res) => {
+        console.log(req.body);
+
+        const customerId = req.body.customerId;
+        const alternateAddressObj = {
+            street: req.body.street,
+            apt: req.body.apt,
+            city: req.body.city,
+            zipcode: req.body.zipcode,
+            state: req.body.state,
+            country: req.body.country,
+            type: "alternate"
+        };
+
+        try {
+            await Customer.findByIdAndUpdate(customerId, {
+                $push: {
+                    "addresses": alternateAddressObj
+                }
+            });
+            res.status(200).send("Added");
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not add alternate address');
+        }
+    }
+
+    // API - to fetch all customer addresses for checkout page
+    fetchCustomerAddresses = async (req, res) => {
+        console.log(req.params)
+        const customerId = req.params.customerId;
+
+        try {
+            const response = await Customer.findById(customerId);
+            console.log(JSON.stringify(response.addresses));
+            res.status(200).send(response.addresses);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch customer addressess');
         }
     }
 }

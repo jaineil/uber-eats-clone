@@ -27,7 +27,8 @@ const customerSchema = new Schema({
                 country: { type: String },
                 type: { type: String }
         }]
-    }
+    },
+    profileImg: { type: String }
     }
 );
 
