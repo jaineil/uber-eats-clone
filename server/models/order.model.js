@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
+    restaurantId: { type: String },
     restaurant: {
         type: {
             name: String,
@@ -13,6 +14,7 @@ const orderSchema = new Schema({
             zipcode: String
         }
     },
+    customerId: { type: String },
     customer: {
         type: {
             firstName: String,
