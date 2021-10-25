@@ -24,7 +24,7 @@ export class RestaurantController {
             veg: req.body.veg,
             nonVeg: req.body.nonVeg,
             vegan: req.body.vegan,
-        }
+        };
 
         const newRestaurant = new Restaurant(restaurantObj);
 
@@ -72,10 +72,76 @@ export class RestaurantController {
                 console.log('User mismatch');
                 res.status(400).send({ validCredentials: false });
             }
-            
+
         } catch (err) {
             console.error('Error => ', err);
-            res.status(500).send('Could not validate customer');
+            res.status(500).send('Could not validate restaurant');
+        }
+    }
+
+    updateRestaurantMeta = async (req, res) => {
+        console.log(req.body);
+
+        const restaurantId = req.body.restaurantId;
+
+        const updatedRestaurantObj = {
+            name: req.body.name,
+            emailId: req.body.emailId,
+            password: req.body.password,
+            contactNumber: req.body.contactNumber,
+            street: req.body.street,
+            shopNo: req.body.apt,
+            city: req.body.city,
+            state: req.body.state,
+            zipcode: req.body.zipcode,
+            country: req.body.country,
+            opensAt: req.body.opensAt,
+            closesAt: req.body.closesAt,
+            description: req.body.description,
+            cuisine: req.body.cuisine,
+            profileImgUrl: req.body.img,
+            deliveryOption: req.body.deliveryOption,
+            pickupOption: req.body.pickupOption,
+            veg: req.body.veg,
+            nonVeg: req.body.nonVeg,
+            vegan: req.body.vegan,
+        };
+
+        try {
+            const response = await Restaurant.updateOne(
+                { _id: restaurantId },
+                {
+                    $set: {
+                        name: updatedRestaurantObj.name,
+                        emailId: updatedRestaurantObj.emailId,
+                        password: updatedRestaurantObj.password,
+                        contactNumber: updatedRestaurantObj.contactNumber,
+                        street: updatedRestaurantObj.street,
+                        shopNo: updatedRestaurantObj.shopNo,
+                        city: updatedRestaurantObj.city,
+                        state: updatedRestaurantObj.state,
+                        zipcode: updatedRestaurantObj.zipcode,
+                        country: updatedRestaurantObj.country,
+                        opensAt: updatedRestaurantObj.opensAt,
+                        closesAt: updatedRestaurantObj.closesAt,
+                        description: updatedRestaurantObj.description,
+                        cuisine: updatedRestaurantObj.cuisine,
+                        profileImgUrl: updatedRestaurantObj.profileImgUrl,
+                        deliveryOption: updatedRestaurantObj.deliveryOption,
+                        pickupOption: updatedRestaurantObj.pickupOption,
+                        veg: updatedRestaurantObj.veg,
+                        nonVeg: updatedRestaurantObj.nonVeg,
+                        vegan: updatedRestaurantObj.vegan,
+                    }
+                }
+            );
+
+            console.log(JSON.stringify(response));
+            res.status(200).send('Updated');
+
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not update restaurant meta');
         }
     }
 }
