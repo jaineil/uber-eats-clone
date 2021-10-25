@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const restaurantSchema = new Schema({
     name: { type: String },
-    emailId: { type: String },
+    emailId: { type: String, unique: true },
     password: { type: String },
     contactNumber: { type: String },
     street: { type: String },

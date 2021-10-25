@@ -37,4 +37,45 @@ export class RestaurantController {
             res.status(500).send('Could not create a restaurant');
         }
     }
+
+    validateRestaurantSignin = async (req, res) => {
+        console.log(req.body);
+
+        const emailId = req.body.emailId;
+        const password = req.body.password;
+
+        try {
+            const response = await Restaurant.findOne({ $and: [{ emailId: emailId }, { password: password }] });
+            console.log(JSON.stringify(response));
+            
+            if (response) {
+
+                const restaurantId = response.id;
+                console.log(restaurantId);
+    
+                res.cookie("restaurantId", restaurantId, {
+                    maxAge: 3600000,
+                    httpOnly: false,
+                    path: "/"
+                });
+                req.session.user = restaurantId;
+
+                res.status(200).send({
+                    validCredentials: true
+                });
+
+                res.status(200).send({
+                    validCredentials: true
+                });
+        
+            } else {
+                console.log('User mismatch');
+                res.status(400).send({ validCredentials: false });
+            }
+            
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not validate customer');
+        }
+    }
 }
