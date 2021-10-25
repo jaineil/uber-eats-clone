@@ -35,7 +35,8 @@ const orderSchema = new Schema({
             dishQuantity: { type: String },
             dishTotalPrice: { type: String }
         }]
-    }
+    },
+    orderNote: { type: String }
 });
 
 const Order = mongoose.model('order', orderSchema);

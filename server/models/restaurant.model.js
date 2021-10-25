@@ -22,7 +22,18 @@ const restaurantSchema = new Schema({
     pickupOption: { type: Boolean },
     veg: { type: Boolean },
     nonVeg: { type: Boolean },
-    vegan: { type: Boolean }
+    vegan: { type: Boolean },
+    dishes: {
+        type: [{
+            name: { type: String },
+            price: { type: Number },
+            description: { type: String },
+            category: { type: String },
+            foodType: { type: String },
+            ingredients: { type: String },
+            dishImgUrl: { type: String }
+        }]
+    }
 });
 
 const Restaurant = mongoose.model('restaurant', restaurantSchema);
