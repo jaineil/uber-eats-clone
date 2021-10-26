@@ -1,4 +1,5 @@
 import Customer from '../models/customer.model.js'
+import Restaurant from '../models/restaurant.model.js';
 
 export class CustomerController {
 
@@ -154,9 +155,12 @@ export class CustomerController {
         const customerId = req.params.customerId;
 
         try {
-            const response = await Customer.findById(customerId);
-            console.log(JSON.stringify(response.favoriteRestaurants));
-            res.status(200).send(response.favoriteRestaurants);
+            const customerMeta = await Customer.findById(customerId);
+            const favoriteIds = customerMeta.favoriteRestaurants;
+            console.log(JSON.stringify(favoriteIds));
+            const response = await Restaurant.find({ _id: { $in: favoriteIds } });
+            console.log(JSON.stringify(response));
+            res.status(200).send(response);
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not fetch customer favortie restos');
