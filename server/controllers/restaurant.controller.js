@@ -1,6 +1,8 @@
 import Restaurant from '../models/restaurant.model.js';
 
 export class RestaurantController {
+
+    // API - to create a new restaurant
     create = async (req, res) => {
         console.log(req.body);
         const restaurantObj = {
@@ -38,6 +40,7 @@ export class RestaurantController {
         }
     }
 
+    // API - to validate restaurant sign in
     validateRestaurantSignin = async (req, res) => {
         console.log(req.body);
 
@@ -79,6 +82,22 @@ export class RestaurantController {
         }
     }
 
+    fetchRestaurantMeta = async (req, res) => {
+        console.log(req.params);
+
+        const restaurantId = req.params.restaurantId;
+
+        try {
+            const response = await Restaurant.findById(restaurantId);
+            console.log(JSON.stringify(response));
+            res.status(200).send(response);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch restaurant details')
+        }
+    }
+
+    // API - to update restaurant details sent via restaurant profile page
     updateRestaurantMeta = async (req, res) => {
         console.log(req.body);
 
@@ -142,6 +161,177 @@ export class RestaurantController {
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not update restaurant meta');
+        }
+    }
+
+    // API - to fetch all restaurants sorted by customer location for customer dashboard page
+    fetchRestaurants = async (req, res) => {
+        const city = req.body.city;
+
+        try {
+            const defaultCityRestaurants = await Restaurant.find({ city: city });
+            console.log(JSON.stringify(defaultCityRestaurants));
+            const otherRestaurants = await Restaurant.find({ city: { $ne: city } });
+            console.log(JSON.stringify(otherRestaurants));
+            const response = defaultCityRestaurants.concat(otherRestaurants);
+            console.log('All restaurants => ', response);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch restaurants for customer dashboard');
+        }
+    }
+
+    // API - add a new dish for restaurant on restaurant/menu page
+    createDish = async (req, res) => {
+        console.log(req.body);
+
+        const restaurantId = req.body.restaurantId;
+        const newDishObj = {
+            name: req.body.name,
+            price: req.body.price,
+            description: req.body.description,
+            category: req.body.category,
+            foodType: req.body.foodType,
+            ingredients: req.body.ingredients,
+            dishImgUrl: req.body.url
+        };
+
+        try {
+            const response = await Restaurant.findByIdAndUpdate({
+                restaurantId, $push: {
+                    "dishes": newDishObj
+                }
+            });
+            console.log(JSON.stringify(response));
+            res.status(200).send('Added');
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not add new dish to restaurant');
+        }
+    }
+
+    // API - to fetch dish details to allow restaurant to edit details on restaurant/menu page
+    fetchOneDishForRestaurant = async (req, res) => {
+        console.log(req.params);
+        const dishId = req.params.dishId;
+
+        try {
+            const response = Restaurant.find({ "dishes._id": dishId });
+            console.log(JSON.stringify(response));
+            res.status(200).send(response);
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch a particular dish');
+        }
+    }
+
+    // API - to persist updated dish details sent from on restaurant/menu page
+    updateDish = async (req, res) => {
+        console.log(req.body);
+
+        const dishId = req.body.mealId;
+
+        const updatedDishObj = {
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            ingredients: req.body.ingredients,
+            category: req.body.category,
+            dishImgUrl: req.body.dishImgUrl,
+            foodType: req.body.foodType
+        };
+        
+        try {
+            const response = await Restaurant.update({ "dishes_.id": dishId }, {
+                $set: {
+                    "dishes.$.name": updatedDishObj.name,
+                    "dishes.$.description": updatedDishObj.description,
+                    "dishes.$.price": updatedDishObj.price,
+                    "dishes.$.ingredients": updatedDishObj.ingredients,
+                    "dishes.$.category": updatedDishObj.category,
+                    "dishes.$dishImgUrl": updatedDishObj.dishImgUrl,
+                    "dishes.$.foodType": updatedDishObj.foodType
+                }
+            });
+            console.log(JSON.stringify(response));
+            res.status(200).send('Updated');
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not update dish details for a restaurant');
+        }
+    }
+
+    // API - to view all dishes from a restaurant to a customer
+    fetchAllDishesForRestaurant = async (req, res) => {
+        console.log(req.params);
+        const restaurantId = req.params.restaurantId;
+
+        try {
+            const restaurant = Restaurant.findById({ _id: restaurantId });
+            console.log(JSON.stringify(restaurant));
+            const response = restaurant.dishes;
+            console.log(JSON.stringify(response));
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch all dishes for a restaurant');
+        }
+    }
+
+    // API - to handle search queries on customer dashboard searchbar
+    // comes in req.query since passed as params
+    search = async (req, res) => {
+        const query = req.query.searchString;
+        const queryString = query.toLowerCase();
+
+        if (queryString === 'pickup' || 'pick up' || 'pick-up') {
+            try {
+                const response = await Restaurant.find({ pickupOption: true });
+                console.log(JSON.stringif(response));
+                res.status(200).send(response);
+            } catch (err) {
+                console.error('Error => ', err);
+                res.status(500).send('Could not find pick up restaurants');
+            }
+        } else if (queryString === 'delivery') {
+            try {
+                const response = await Restaurant.find({ deliveryOption: true });
+                console.log(JSON.stringif(response));
+                res.status(200).send(response);
+            } catch (err) {
+                console.error('Error => ', err);
+                res.status(500).send('Could not find delivery restaurants');
+            }
+        } else {
+            try {
+                const response = await Restaurant.find({
+                    $or: [
+                        {
+                            "name": {
+                                $regex: searchString,
+                                $options: 'i'
+                            }
+                        },
+                        {
+                            "dishes.name": {
+                                $regex: searchString,
+                                $options: 'i'
+                            }
+                        },
+                        {
+                            'addresses.city': {
+                                $regex: searchString,
+                                $options: 'i'
+                            }
+                        }
+                    ]
+                });
+    
+                console.log(JSON.stringify(response));
+                res.status(200).send(response);
+            } catch (err) {
+                console.error('Error => ', err);
+                res.status(500).send('Could not find search string in restaurants');
+            }
         }
     }
 }
