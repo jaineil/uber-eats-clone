@@ -9,7 +9,7 @@ const orderSchema = new Schema({
             name: String,
             contactNumber: String,
             street: String,
-            apt: String,
+            shopNo: String,
             city: String,
             zipcode: String
         }
