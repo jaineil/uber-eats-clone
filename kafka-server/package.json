@@ -7,7 +7,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "nodemon index.js",
-		"start": "nodemon --experimental-modules index.js"
+		"start": "nodemon --experimental-modules server.js"
 	},
 	"author": "Jaineil Mandavia",
 	"license": "ISC",

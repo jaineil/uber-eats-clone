@@ -4,9 +4,10 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import uri from './models/config/db.config.js';
-import customerRoutes from './routes/customer.routes.js';
-import orderRoutes from './routes/order.routes.js';
-import restaurantRoutes from './routes/restaurant.routes.js';
+import { make_request } from './kafka/client.js';
+// import customerRoutes from './routes/customer.routes.js';
+// import orderRoutes from './routes/order.routes.js';
+// import restaurantRoutes from './routes/restaurant.routes.js';
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:3001', credentials: true }));
@@ -29,8 +30,8 @@ app.use(
 	}),
 );
 
-app.use(customerRoutes);
-app.use(restaurantRoutes);
+// app.use(customerRoutes);
+// app.use(restaurantRoutes);
 // app.use(orderRoutes);
 
 try {
@@ -45,3 +46,18 @@ try {
 } catch (err) {
 	console.error('Could not connect Mongoose => ', err);
 }
+
+app.post('/create-customer', async (req, res) => {
+	make_request('create-customer', req.body, (err, results) => {
+		console.log(results);
+		if (err) {
+			res.json({
+				status: "Error",
+				msg: "System error, try again."
+			})
+		} else {
+			res.json(results);
+			res.end();
+		}
+	});
+});
