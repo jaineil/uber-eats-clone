@@ -121,7 +121,7 @@ export class OrderController {
                     newPaginationHook: newPaginationHook
                 };
                 console.log(JSON.stringify(finalResponse));
-                res.status(200).send('Fetched');
+                res.status(200).send(finalResponse);
             } catch (err) {
                 console.error(err);
                 console.log('Could not fetch customer order history w/o pagination');
@@ -136,7 +136,7 @@ export class OrderController {
                     newPaginationHook: updatedPaginationHook
                 };
                 console.log(JSON.stringify(finalResponse));
-                res.status(200).send('Fetched');
+                res.status(200).send(finalResponse);
             } catch (err) {
                 console.error(err);
                 console.log('Could not fetch customer order history with pagination');
