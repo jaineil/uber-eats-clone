@@ -19,7 +19,6 @@ import { awsServer } from "../../config/awsIP";
 export const CustomerRegistration = (props) => {
 	const history = useHistory();
 
-	const [username, setUserName] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [dateOfBirth, setDateOfBirth] = useState("mm-dd-yyyy");
@@ -34,25 +33,27 @@ export const CustomerRegistration = (props) => {
 
 	const createAccount = async (e) => {
 		e.preventDefault();
-
+		console.log('Before ', dateOfBirth)
+		const dob = new Date(dateOfBirth);
+		console.log('After ', dob);
 		const payload = {
-			username: username,
 			firstName: firstName,
 			lastName: lastName,
-			dateOfBirth: new Date(dateOfBirth).toISOString(),
-			mobileNumber: String(mobileNumber),
+			emailId: emailId,
+			password: password,
+			dob: dob,
+			contactNumber: String(mobileNumber),
 			street: street,
 			apt: apt,
 			city: city,
-			state: state,
 			zipcode: zipcode,
+			state: state,
 			country: "United States",
-			emailId: emailId,
-			password: password,
+			type: "default"
 		};
 		console.log("Created payload!");
 		try {
-			await Axios.post(`http://${awsServer}/createCustomer`, payload);
+			await Axios.post(`http://${awsServer}/create-customer`, payload);
 			console.log("Successfully registered");
 			history.push("/customerSignin");
 		} catch (err) {
@@ -93,19 +94,6 @@ export const CustomerRegistration = (props) => {
 			>
 				<Col>
 					<Form onSubmit={createAccount} className="p2">
-						<FormGroup className="mt-3">
-							<FormLabel>Username: </FormLabel>
-							<FormControl
-								//className="registration-form"
-								type="text"
-								name="username"
-								onChange={(e) => {
-									setUserName(e.target.value);
-								}}
-								placeholder="eg. johndoe"
-								required
-							/>
-						</FormGroup>
 
 						<FormGroup className="mt-3">
 							<FormLabel>First Name: </FormLabel>

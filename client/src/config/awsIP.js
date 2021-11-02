@@ -1,1 +1,1 @@
-export const awsServer = `localhost:3000`;
+export const awsServer = `localhost:3001`;
