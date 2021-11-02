@@ -1,4 +1,4 @@
-import { Container, Navbar, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { useHistory } from "react-router";
 import cookie from "react-cookies";
 import "./RestaurantDashboard.css";

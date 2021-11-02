@@ -10,7 +10,6 @@ import {
 	Row,
 	Col,
 	Button,
-	Navbar,
 } from "react-bootstrap";
 import cookie from "react-cookies";
 import Axios from "axios";

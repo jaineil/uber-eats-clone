@@ -4,7 +4,6 @@ import {
 	Row,
 	Col,
 	Container,
-	Navbar,
 	Form,
 	FormControl,
 } from "react-bootstrap";

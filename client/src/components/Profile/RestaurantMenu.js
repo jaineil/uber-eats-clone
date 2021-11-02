@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import {
 	Container,
-	Navbar,
 	Card,
 	Button,
 	Row,
