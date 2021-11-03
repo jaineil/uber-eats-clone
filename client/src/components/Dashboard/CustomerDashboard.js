@@ -55,11 +55,17 @@ export const CustomerDashboard = (props) => {
 	}, []);
 
 	const fetchRestaurants = async () => {
+		const currLocation = await fetchCustomerLocation();
 		console.log("About to fetch restaurants");
 		try {
 			const response = await Axios.get(
-				`http://${awsServer}/fetchRestaurants/${customerId}`
+				`http://${awsServer}/restaurants`, {
+					params: {
+						city: currLocation
+					}
+				}
 			);
+			console.log(response);
 			setRestaurants(response.data);
 			setDisplayRestaurants(response.data);
 			setSearchedRestaurants(response.data);
@@ -78,9 +84,11 @@ export const CustomerDashboard = (props) => {
 		console.log("About to fetch customer location");
 		try {
 			const response = await Axios.get(
-				`http://${awsServer}/fetchCustomerLocation/${customerId}`
+				`http://${awsServer}/fetch-customer-location/${customerId}`
 			);
-			setLocation(response.data[0].CITY);
+			console.log(response.data);
+			setLocation(response.data.city);
+			return response.data.city;
 		} catch (err) {
 			console.log(err);
 			console.log("Could not fetch customer location");
@@ -324,34 +332,34 @@ export const CustomerDashboard = (props) => {
 				<Card.Img
 					variant="top"
 					style={{ height: "20vh" }}
-					src={resto.RESTAURANT_IMAGE_URL}
+					src={resto.profileImgUrl}
 				/>
 				<Card.Body style={{ height: "10vh" }}>
 					<Row>
 						<Card.Title>
-							<h5>{resto.NAME}</h5>
+							<h5>{resto.name}</h5>
 						</Card.Title>
 					</Row>
 					<Row>
 						<Col>
 							<Card.Text>
-								<h6>Opens at: {resto.OPENS_AT} </h6>
+								<h6>Opens at: {resto.opensAt} </h6>
 							</Card.Text>
 						</Col>
 						<Col>
 							<Card.Text>
-								<h6>Closes at: {resto.CLOSES_AT}</h6>
+								<h6>Closes at: {resto.closesAt}</h6>
 							</Card.Text>
 						</Col>
 						<Card.Text>
-							<h5>{resto.CITY}</h5>
+							<h5>{resto.city}</h5>
 						</Card.Text>
 					</Row>
 				</Card.Body>
 				<Card.Footer style={{ height: "15vh" }}>
 					<Row>
 						<Col>
-							<Link to={`/chooseDish/${resto.ID}`}>
+							<Link to={`/chooseDish/${resto._id}`}>
 								<Button
 									variant="primary"
 									size="sm"
@@ -372,7 +380,7 @@ export const CustomerDashboard = (props) => {
 									backgroundColor: "black",
 									border: "black",
 								}}
-								onClick={addToFavorite(resto.ID)}
+								onClick={addToFavorite(resto._id)}
 							>
 								Add to favorite
 							</Button>

@@ -84,10 +84,10 @@ export class CustomerController {
 
     // API - to validate customer's credentials on sign-in
     validateCustomerSignin = async (req, res) => {
-        console.log(req.body);
+        console.log(req.query);
         const validateCustomerSigninReqObj = {
-            emailId: req.body.emailId,
-            password: req.body.password
+            emailId: req.query.emailId,
+            password: req.query.password
         }
 
         try {
@@ -119,7 +119,7 @@ export class CustomerController {
         }
     }
 
-    // API - to fetch customer details for profile page (should take care of fetchCustomerDefaultLocation data)
+    // API - to fetch customer details for profile page
     fetchCustomerMeta = async (req, res) => {
         console.log(req.params)
         const customerId = req.params.customerId;
@@ -131,6 +131,22 @@ export class CustomerController {
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not fetch customer meta');
+        }
+    }
+
+    // API - to fetch current customer location (city)
+    fetchCurrentCustomerLocation = async (req, res) => {
+        console.log(req.params);
+        const customerId = req.params.customerId;
+
+        try {
+            const response = await Customer.findById(customerId);
+            const city = response.addresses[0].city;
+            console.log(city);
+            res.status(200).send({ city: city });
+        } catch (err) {
+            console.error('Error => ', err);
+            res.status(500).send('Could not fetch customer current location');
         }
     }
 

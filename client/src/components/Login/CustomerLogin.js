@@ -36,9 +36,14 @@ export const CustomerLogin = (props) => {
 
 		console.log("Created payload! => ", JSON.stringify(payload));
 		try {
-			const response = await Axios.post(
-				`http://${awsServer}/customerSignin`,
-				payload
+			const response = await Axios.get(
+				`http://${awsServer}/validate-customer`,
+				{
+					params: {
+						emailId: emailId,
+						password: password
+					}
+				}
 			);
 			console.log(response);
 			console.log("Successfully login");

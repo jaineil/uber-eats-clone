@@ -166,15 +166,19 @@ export class RestaurantController {
 
     // API - to fetch all restaurants sorted by customer location for customer dashboard page
     fetchRestaurants = async (req, res) => {
-        const city = req.body.city;
+        console.log(req.query);
+        const city = req.query.city;
 
         try {
             const defaultCityRestaurants = await Restaurant.find({ city: city });
-            console.log(JSON.stringify(defaultCityRestaurants));
+            console.log('Default city restaurants => ', defaultCityRestaurants);
+            
             const otherRestaurants = await Restaurant.find({ city: { $ne: city } });
-            console.log(JSON.stringify(otherRestaurants));
+            console.log('Other restaurants => ', otherRestaurants);
+
             const response = defaultCityRestaurants.concat(otherRestaurants);
             console.log('All restaurants => ', response);
+            res.status(200).send(response);
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not fetch restaurants for customer dashboard');
