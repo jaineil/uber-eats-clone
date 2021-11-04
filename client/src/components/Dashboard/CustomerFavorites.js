@@ -5,6 +5,7 @@ import cookie from "react-cookies";
 import Axios from "axios";
 import { Card, Col, Row, Button, Container } from "react-bootstrap";
 import CustNavbar from "../Navbar/CustNavbar.js";
+import { awsServer } from "../../config/awsIP";
 
 export const CustomerFavorites = (props) => {
 	const customerId = props.match.params.customerId;
@@ -32,7 +33,7 @@ export const CustomerFavorites = (props) => {
 
 	const fetchFavorites = async () => {
 		try {
-			const response = await Axios.get(`/fetchFavorites/${customerId}`);
+			const response = await Axios.get(`http://${awsServer}/fetch-favorites/${customerId}`);
 			setRestaurants(response.data);
 			restaurants.map((item) => console.log(JSON.stringify(item)));
 		} catch (err) {
@@ -51,34 +52,34 @@ export const CustomerFavorites = (props) => {
 				<Card.Img
 					variant="top"
 					style={{ height: "20vh" }}
-					src={resto.RESTAURANT_IMAGE_URL}
+					src={resto.profileImgUrl}
 				/>
 				<Card.Body style={{ height: "10vh" }}>
 					<Row>
 						<Card.Title>
-							<h5>{resto.NAME}</h5>
+							<h5>{resto.name}</h5>
 						</Card.Title>
 					</Row>
 					<Row>
 						<Col>
 							<Card.Text>
-								<h6>Opens at: {resto.OPENS_AT} </h6>
+								<h6>Opens at: {resto.opensAt} </h6>
 							</Card.Text>
 						</Col>
 						<Col>
 							<Card.Text>
-								<h6>Closes at: {resto.CLOSES_AT}</h6>
+								<h6>Closes at: {resto.closesAt}</h6>
 							</Card.Text>
 						</Col>
 						<Card.Text>
-							<h5>{resto.CITY}</h5>
+							<h5>{resto.city}</h5>
 						</Card.Text>
 					</Row>
 				</Card.Body>
 				<Card.Footer style={{ height: "10vh" }}>
 					<Row>
 						<Col>
-							<Link to={`/chooseDish/${resto.ID}`}>
+							<Link to={`/chooseDish/${resto._id}`}>
 								<Button
 									variant="primary"
 									size="sm"

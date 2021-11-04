@@ -51,12 +51,12 @@ export const OrderSummary = (props) => {
 		const fetchAllAddresses = async () => {
 			try {
 				const response = await Axios.get(
-					`http://${awsServer}/fetchAddresses/${customerId}`
+					`http://${awsServer}/fetch-addresses/${customerId}`
 				);
 				console.log(response.data);
 				setAddressIds(response.data);
 				const defaultAddress = response.data[0];
-				setSelectedAddressId(defaultAddress.ID);
+				setSelectedAddressId(defaultAddress.id);
 			} catch (err) {
 				console.error(err);
 			}
@@ -80,14 +80,15 @@ export const OrderSummary = (props) => {
 	));
 
 	const addressList = addressIds.map((addr) => (
-		<option value={addr.ID}>
-			{addr.HOUSE_NUMBER} {addr.STREET} {addr.CITY} {addr.STATE}{" "}
-			{addr.PINCODE}
+		<option value={addr.id}>
+			{addr.apt}, {addr.street}, {addr.city}, {addr.state},{" "}
+			{addr.zipcode}
 		</option>
 	));
 
 	const selectAddressHandler = (e) => {
-		e.preventDefault();
+		// e.preventDefault();
+		console.log('Address Id about to be handled', e.target.value)
 		setSelectedAddressId(e.target.value);
 	};
 
@@ -117,12 +118,13 @@ export const OrderSummary = (props) => {
 		const payload = {
 			restaurantId: cart.restaurantId,
 			customerId: customerId,
-			time: today.toISOString(),
-			amount: parseInt(cart.total),
+			time: today,
+			amount: cart.total,
 			addressId: selectedAddressId,
 			items: cart.cartItems,
 		};
-		const res = await Axios.post(`http://${awsServer}/placeOrder`, payload);
+		console.log(payload);
+		const res = await Axios.post(`http://${awsServer}/create-order`, payload);
 		console.log("Response from API => ", res);
 	};
 

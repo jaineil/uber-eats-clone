@@ -17,7 +17,7 @@ export const RestaurantDetails = (props) => {
 		console.log("All good on the cookie front!");
 	}
 	const restaurantId = props.match.params.restaurantId;
-
+	console.log('Fetching details for resto => ', restaurantId);
 	const [meals, setMeals] = useState([]);
 	const [restaurantMeta, setRestaurantMeta] = useState([]);
 	const [cartIsShown, setCartIsShown] = useState(false);
@@ -35,32 +35,17 @@ export const RestaurantDetails = (props) => {
 		const fetchRestaurantMeta = async () => {
 			try {
 				const response = await Axios.get(
-					`http://${awsServer}/fetchRestaurantMeta/${restaurantId}`
+					`http://${awsServer}/fetch-restaurant/${restaurantId}`
 				);
-				const meta = response.data[0];
+				const meta = response.data;
 				setRestaurantMeta(meta);
+				setMeals(meta.dishes);
 				console.log("Restaurant Meta => ", restaurantMeta);
 			} catch (err) {
 				console.error(err);
 			}
 		};
 		fetchRestaurantMeta();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	useEffect(() => {
-		const fetchAllMeals = async () => {
-			try {
-				const response = await Axios.get(
-					`http://${awsServer}/fetchDishes/${restaurantId}`
-				);
-				setMeals(response.data);
-				console.log("Restaurant Meta => ", meals);
-			} catch (err) {
-				console.error(err);
-			}
-		};
-		fetchAllMeals();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -79,11 +64,11 @@ export const RestaurantDetails = (props) => {
 			)}
 			<Header
 				onShowCart={showCartHandler}
-				restaurantImg={restaurantMeta.RESTAURANT_IMAGE_URL}
-				name={restaurantMeta.NAME}
+				restaurantImg={restaurantMeta.profileImgUrl}
+				name={restaurantMeta.name}
 			/>
 			<main>
-				<Meals meals={meals} summary={restaurantMeta.DESCRIPTION} />
+				<Meals meals={meals} summary={restaurantMeta.description} />
 			</main>
 		</CartProvider>
 	);

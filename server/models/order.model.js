@@ -33,7 +33,7 @@ const orderSchema = new Schema({
         type: [{
             dishName: { type: String },
             dishQuantity: { type: String },
-            dishTotalPrice: { type: String }
+            dishTotalPrice: { type: Number }
         }]
     },
     orderNote: { type: String }

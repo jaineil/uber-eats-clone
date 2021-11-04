@@ -201,8 +201,10 @@ export class RestaurantController {
         };
 
         try {
-            const response = await Restaurant.findByIdAndUpdate({
-                restaurantId, $push: {
+            const response = await Restaurant.findByIdAndUpdate(
+                { "_id": restaurantId },
+                {
+                    $push: {
                     "dishes": newDishObj
                 }
             });
@@ -269,12 +271,13 @@ export class RestaurantController {
     fetchAllDishesForRestaurant = async (req, res) => {
         console.log(req.params);
         const restaurantId = req.params.restaurantId;
-
+        console.log('About to fetch dishes for restaurant => ', restaurantId);
         try {
             const restaurant = Restaurant.findById({ _id: restaurantId });
             console.log(JSON.stringify(restaurant));
             const response = restaurant.dishes;
             console.log(JSON.stringify(response));
+            res.staus(200).send(response);
         } catch (err) {
             console.error('Error => ', err);
             res.status(500).send('Could not fetch all dishes for a restaurant');
@@ -290,7 +293,7 @@ export class RestaurantController {
         if (queryString === 'pickup' || 'pick up' || 'pick-up') {
             try {
                 const response = await Restaurant.find({ pickupOption: true });
-                console.log(JSON.stringif(response));
+                console.log(JSON.stringify(response));
                 res.status(200).send(response);
             } catch (err) {
                 console.error('Error => ', err);

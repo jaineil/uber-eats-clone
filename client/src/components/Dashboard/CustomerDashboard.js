@@ -287,7 +287,7 @@ export const CustomerDashboard = (props) => {
 
 	const searchHandler = async (e) => {
 		try {
-			const res = await Axios.get("/search", {
+			const res = await Axios.get(`http://${awsServer}/search`, {
 				params: {
 					searchString: searchInput,
 				},
@@ -317,7 +317,7 @@ export const CustomerDashboard = (props) => {
 		console.log(JSON.stringify(payload));
 		try {
 			const res = await Axios.post(
-				`http://${awsServer}/addFavorite`,
+				`http://${awsServer}/add-favorite`,
 				payload
 			);
 			console.log("Successfully added to favorites ", res.data);
@@ -341,16 +341,9 @@ export const CustomerDashboard = (props) => {
 						</Card.Title>
 					</Row>
 					<Row>
-						<Col>
 							<Card.Text>
-								<h6>Opens at: {resto.opensAt} </h6>
+								<h6>Open from: {resto.opensAt} to {resto.closesAt}</h6>
 							</Card.Text>
-						</Col>
-						<Col>
-							<Card.Text>
-								<h6>Closes at: {resto.closesAt}</h6>
-							</Card.Text>
-						</Col>
 						<Card.Text>
 							<h5>{resto.city}</h5>
 						</Card.Text>
