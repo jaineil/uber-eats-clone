@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useHistory } from "react-router";
-import { Row, Col, Container, FormControl } from "react-bootstrap";
+import { Row, Col, Container, FormControl, Pagination } from "react-bootstrap";
 import cookie from "react-cookies";
 import Axios from "axios";
 import CustNavbar from "../Navbar/CustNavbar";
@@ -8,8 +8,12 @@ import classes from "../Orders/RestaurantOrders.module.css";
 import { awsServer } from "../../config/awsIP";
 
 export const CustomerOrders = (props) => {
-	const [orders, setOrders] = useState([]);
 	const [displayOrders, setDisplayOrders] = useState([]);
+	const [paginationItems, setPaginationItems] = useState([]);
+	const [orderStatus, setOrderStatus] = useState();
+	const [pageLimit, setPageLimit] = useState();
+	const [currentPageNumber, setCurrentPageNumber] = useState();
+	const [totalPages, setTotalPages] = useState();
 
 	const history = useHistory();
 
@@ -30,38 +34,163 @@ export const CustomerOrders = (props) => {
 		};
 	}, []);
 
-	const fetchOrders = async () => {
+	const defaultFetchOrders = async () => {
 		console.log("About to fetch orders for => ", customerId);
-		let temp = [];
+
 		try {
-			const response = await Axios.get(
-				`http://${awsServer}/fetchOrderHistory/${customerId}`
+			const orders = await Axios.get(
+				`http://${awsServer}/customer-order-history`,
+				{
+					params: {
+						customerId: customerId,
+						pageLimit: 5,
+						pageNumber: 1,
+					},
+				}
 			);
-			const fetchedOrders = response.data;
 
-			for (const k of fetchedOrders) {
-				console.log(k);
-				temp.push(k);
-			}
+			const computedTotalPages = await Axios.get(
+				`http://${awsServer}/compute-pages`,
+				{
+					params: {
+						id: customerId,
+						pageLimit: 5,
+					},
+				}
+			);
 
-			setOrders(temp);
+			console.log(
+				"Total pages created => ",
+				computedTotalPages.data.pages
+			);
+
+			setCurrentPageNumber(1);
+			setPageLimit(5);
+			setTotalPages(computedTotalPages.data.pages);
+
+			createDisplayableOrderCards(orders.data);
+			createPaginationButtons(computedTotalPages.data.pages, 1);
 		} catch (err) {
 			console.error(err);
 		}
 	};
 
 	useEffect(() => {
-		fetchOrders();
+		defaultFetchOrders();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const createOrdersSummary = (dishNames) => {
-		const arrDishNames = dishNames.split(",");
-		console.log(arrDishNames);
-		const orderItemsList = arrDishNames.map((orderItem) => (
+	const fetchOrders = async (
+		selectedOrderStatus,
+		selectedPageLimit,
+		selectedPageNumber
+	) => {
+		console.log("About to fetch filtered orders for => ", customerId);
+		console.log(
+			"New filters payload => ",
+			selectedOrderStatus,
+			selectedPageLimit,
+			selectedPageNumber
+		);
+		try {
+			const orders = await Axios.get(
+				`http://${awsServer}/customer-order-history`,
+				{
+					params: {
+						orderStatus: selectedOrderStatus,
+						customerId: customerId,
+						pageLimit: selectedPageLimit,
+						pageNumber: selectedPageNumber,
+					},
+				}
+			);
+
+			const computedTotalPages = await Axios.get(
+				`http://${awsServer}/compute-pages`,
+				{
+					params: {
+						id: customerId,
+						orderStatus: selectedOrderStatus,
+						pageLimit: selectedPageLimit,
+					},
+				}
+			);
+
+			console.log(
+				"Total pages created => ",
+				computedTotalPages.data.pages
+			);
+
+			setTotalPages(computedTotalPages.data.pages);
+			createPaginationButtons(
+				computedTotalPages.data.pages,
+				selectedPageNumber
+			);
+			createDisplayableOrderCards(orders.data);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
+	const handleOrdersStatusChange = async (e) => {
+		const newOrderStatus = e.target.value;
+		setOrderStatus(newOrderStatus);
+
+		if (newOrderStatus === "All") {
+			await defaultFetchOrders();
+		} else {
+			await fetchOrders(newOrderStatus, pageLimit, currentPageNumber);
+		}
+	};
+
+	const handleOrdersPageLimit = async (e) => {
+		const newPageLimit = e.target.value;
+		setPageLimit(parseInt(newPageLimit));
+
+		if (newPageLimit === "default") {
+			await defaultFetchOrders();
+		} else {
+			await fetchOrders(orderStatus, newPageLimit, currentPageNumber);
+		}
+	};
+
+	const handleOrdersPageChange = async (e) => {
+		const newCurrentPageNumber = e.target.innerText;
+		setCurrentPageNumber(newCurrentPageNumber);
+
+		await fetchOrders(orderStatus, pageLimit, newCurrentPageNumber);
+	};
+
+	const createPaginationButtons = (totalPages, updatedCurrentPageNumber) => {
+		let items = [];
+
+		for (let number = 1; number <= totalPages; number++) {
+			items.push({
+				number: number,
+				isActive: number === parseInt(updatedCurrentPageNumber),
+			});
+		}
+		setPaginationItems(items);
+	};
+
+	const createPaginationButtonsHTML = (obj) => {
+		return (
+			<Pagination.Item
+				key={obj.number}
+				active={obj.isActive}
+				activeLabel=""
+				onClick={handleOrdersPageChange}
+			>
+				{obj.number}
+			</Pagination.Item>
+		);
+	};
+
+	const createOrdersSummary = (orderItems) => {
+		const orderItemsList = orderItems.map((orderItem) => (
 			<Row>
 				<Col style={{ width: "150px", marginLeft: "100px" }}>
-					{orderItem}
+					{orderItem.dishName}
 					<hr />
 				</Col>
 			</Row>
@@ -70,57 +199,68 @@ export const CustomerOrders = (props) => {
 		return orderItemsList;
 	};
 
-	const handleOrdersFilterChange = (e) => {
-		const filter = e.target.value;
-		let filteredOrders = [];
+	const makeDisplayableDate = (time) => {
+		const d = new Date(time);
+		return d.toDateString();
+	};
 
+	const createDisplayableOrderCards = (orders) => {
+		let ordersList = [];
+		console.log("Orders => ", orders);
 		for (const order of orders) {
-			if (order.STATUS === filter) {
-				filteredOrders.push(
-					<Container>
-						<li className={classes.order}>
-							<Row>
-								<Col>
-									<h3>{order.NAME}</h3>
-									<div>
-										{order.STREET} #{order.HOUSE_NUMBER}
-									</div>
-									<div>{order.CITY}</div>
-									<br />
-									<div>
-										<Col>
-											Contact: {order.CONTACT_NUMBER}
-										</Col>
-									</div>
-								</Col>
+			ordersList.push(
+				<Container>
+					<li className={classes.order}>
+						<Row>
+							<Col>
+								<h3>{order.restaurant.name}</h3>
+								<div>
+									{order.restaurant.street} #
+									{order.restaurant.shopNo}
+								</div>
+								<div>{order.restaurant.city}</div>
+								<br />
+								<div>
+									<Col>
+										Contact:{" "}
+										{order.restaurant.contactNumber}
+									</Col>
+								</div>
+							</Col>
 
-								<Col>
-									<Row>Current status: {order.STATUS}</Row>
-									<Row>When: {order.ORDER_TIME}</Row>
-								</Col>
+							<Col>
+								<Row>Current status: {order.status}</Row>
+								<Row>
+									When: {makeDisplayableDate(order.time)}
+								</Row>
+								<Row>
+									{order.orderNote
+										? `Order notes: ${order.orderNote}`
+										: ""}
+								</Row>
+							</Col>
 
-								<Col>
-									<div>
-										{createOrdersSummary(order.DISH_NAMES)}
-									</div>
-									<div style={{ paddingLeft: "100px" }}>
-										<h6>Total: ${order.AMOUNT}</h6>
-									</div>
-								</Col>
-							</Row>
-						</li>
-					</Container>
-				);
-			}
+							<Col>
+								<div>
+									{createOrdersSummary(order.orderItems)}
+								</div>
+								<div style={{ paddingLeft: "100px" }}>
+									<h6>Total: ${order.totalAmount}</h6>
+								</div>
+							</Col>
+						</Row>
+					</li>
+				</Container>
+			);
 		}
 
-		setDisplayOrders(filteredOrders);
+		setDisplayOrders(ordersList);
 	};
 
 	return (
 		<Container fluid>
 			<CustNavbar />
-
+			{console.log("ORDER STATUS => ", orderStatus)}
 			<h3
 				className="mt-3"
 				style={{
@@ -132,23 +272,53 @@ export const CustomerOrders = (props) => {
 				Your Past Orders
 			</h3>
 			<br />
-			<FormControl
-				as="select"
-				onChange={handleOrdersFilterChange}
-				style={{ backgroundColor: "whitesmoke" }}
-			>
-				<option>Select type of order to view</option>
-				<option value="ORDER_PLACED">Order Placed</option>
-				<option value="PREPARING">Preparing</option>
-				<option value="ON_THE_WAY">On the way</option>
-				<option value="DELIVERED">Delivered</option>
-			</FormControl>
+
+			<Row>
+				<Col>
+					<FormControl
+						as="select"
+						onChange={handleOrdersStatusChange}
+						style={{ backgroundColor: "whitesmoke" }}
+					>
+						<option value="All">
+							Select type of order to view
+						</option>
+						<option value="Order Placed">Order Placed</option>
+						<option value="Preparing">Preparing</option>
+						<option value="Cancelled">Cancelled</option>
+						<option value="On the way">On the way</option>
+						<option value="Picked up">Picked up</option>
+						<option value="Delivered">Delivered</option>
+					</FormControl>
+				</Col>
+				<Col></Col>
+				<Col>
+					<FormControl
+						as="select"
+						onChange={handleOrdersPageLimit}
+						style={{ backgroundColor: "whitesmoke" }}
+					>
+						<option value="default">
+							Select number of results
+						</option>
+						<option value="2">2</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+					</FormControl>
+				</Col>
+			</Row>
 
 			<h4 style={{ color: "white" }}>Your past orders</h4>
 
 			<section className={classes.orders}>
 				<div className={classes.card}>
 					<ul>{displayOrders}</ul>
+				</div>
+				<br />
+				<div>
+					<Pagination size="sm">
+						{paginationItems.map(createPaginationButtonsHTML)}
+					</Pagination>
 				</div>
 			</section>
 		</Container>

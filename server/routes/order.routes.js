@@ -5,6 +5,7 @@ const orderRoutes = express.Router();
 const orderController = new OrderController();
 
 orderRoutes.post('/create-order', orderController.createOrder);
+orderRoutes.get('/compute-pages', orderController.computePagination);
 orderRoutes.get('/customer-order-history', orderController.fetchCustomerOrderHistory);
 orderRoutes.get('/restaurant-order-history', orderController.fetchRestaurantOrderHistory);
 orderRoutes.post('/cancel-order/:orderId', orderController.handleCustomerOrderCancellation);
