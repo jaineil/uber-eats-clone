@@ -6,6 +6,7 @@ import {
 	Container,
 	Form,
 	FormControl,
+	Pagination,
 } from "react-bootstrap";
 import cookie from "react-cookies";
 import Axios from "axios";
@@ -14,8 +15,12 @@ import RestNavbar from "../Navbar/RestNavbar";
 import { awsServer } from "../../config/awsIP";
 
 export const RestaurantOrders = () => {
-	const [orders, setOrders] = useState([]);
 	const [displayOrders, setDisplayOrders] = useState([]);
+	const [paginationItems, setPaginationItems] = useState([]);
+	const [orderStatus, setOrderStatus] = useState();
+	const [pageLimit, setPageLimit] = useState();
+	const [currentPageNumber, setCurrentPageNumber] = useState();
+	const [totalPages, setTotalPages] = useState();
 
 	const history = useHistory();
 
@@ -35,66 +40,182 @@ export const RestaurantOrders = () => {
 		};
 	}, []);
 
-	const fetchOrders = async () => {
-		console.log("About to fetch dishes for => ", restaurantId);
-		let temp = [];
+	const defaultFetchOrders = async () => {
+		console.log("About to fetch orders for => ", restaurantId);
+
 		try {
-			const response = await Axios.get(
-				`http://${awsServer}/fetchCustomerOrders/${restaurantId}`
+			const orders = await Axios.get(
+				`http://${awsServer}/restaurant-order-history`,
+				{
+					params: {
+						restaurantId: restaurantId,
+						pageLimit: 5,
+						pageNumber: 1,
+					},
+				}
 			);
-			const fetchedOrders = response.data;
 
-			for (const k of fetchedOrders) {
-				console.log(k);
-				temp.push(k);
-			}
+			const computedTotalPages = await Axios.get(
+				`http://${awsServer}/compute-pages`,
+				{
+					params: {
+						id: restaurantId,
+						pageLimit: 5,
+					},
+				}
+			);
 
-			setOrders(temp);
+			console.log(
+				"Total pages created => ",
+				computedTotalPages.data.pages
+			);
+
+			setCurrentPageNumber(1);
+			setPageLimit(5);
+			setTotalPages(computedTotalPages.data.pages);
+
+			createDisplayableOrderCards(orders.data);
+			createPaginationButtons(computedTotalPages.data.pages, 1);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
+	const fetchOrders = async (
+		selectedOrderStatus,
+		selectedPageLimit,
+		selectedPageNumber
+	) => {
+		console.log("About to fetch filtered orders for => ", restaurantId);
+		console.log(
+			"New filters payload => ",
+			selectedOrderStatus,
+			selectedPageLimit,
+			selectedPageNumber
+		);
+		try {
+			const orders = await Axios.get(
+				`http://${awsServer}/restaurant-order-history`,
+				{
+					params: {
+						orderStatus: selectedOrderStatus,
+						restaurantId: restaurantId,
+						pageLimit: selectedPageLimit,
+						pageNumber: selectedPageNumber,
+					},
+				}
+			);
+
+			const computedTotalPages = await Axios.get(
+				`http://${awsServer}/compute-pages`,
+				{
+					params: {
+						id: restaurantId,
+						orderStatus: selectedOrderStatus,
+						pageLimit: selectedPageLimit,
+					},
+				}
+			);
+
+			console.log(
+				"Total pages created => ",
+				computedTotalPages.data.pages
+			);
+
+			setTotalPages(computedTotalPages.data.pages);
+			createPaginationButtons(
+				computedTotalPages.data.pages,
+				selectedPageNumber
+			);
+			createDisplayableOrderCards(orders.data);
 		} catch (err) {
 			console.error(err);
 		}
 	};
 
 	useEffect(() => {
-		fetchOrders();
+		defaultFetchOrders();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const updateOrderStatus = async (payload) => {
+	const createPaginationButtons = (totalPages, updatedCurrentPageNumber) => {
+		let items = [];
+
+		for (let number = 1; number <= totalPages; number++) {
+			items.push({
+				number: number,
+				isActive: number === parseInt(updatedCurrentPageNumber),
+			});
+		}
+		setPaginationItems(items);
+	};
+
+	const createPaginationButtonsHTML = (obj) => {
+		return (
+			<Pagination.Item
+				key={obj.number}
+				active={obj.isActive}
+				activeLabel=""
+				onClick={handleOrdersPageChange}
+			>
+				{obj.number}
+			</Pagination.Item>
+		);
+	};
+
+	const updateOrderStatus = (id) => async (e) => {
+		const payload = {
+			orderId: id,
+			orderStatus: e.target.value,
+		};
+
 		try {
 			console.log("Shooting payload => ", payload);
-			await Axios.post(`http://${awsServer}/updateOrderStatus`, payload);
+			await Axios.post(
+				`http://${awsServer}/update-order-status`,
+				payload
+			);
 			window.location.reload(false);
+			//console.log("Shot this update call with payload =>", payload);
 		} catch (err) {
 			console.error("Error when updating order status => ", err);
 		}
 	};
 
-	const handleOrderStatusChange = (id) => async (e) => {
-		const payload = {
-			orderId: id,
-			orderStatus: e.target.value,
-		};
-		await updateOrderStatus(payload);
+	const handleOrdersStatusChange = async (e) => {
+		const newOrderStatus = e.target.value;
+		setOrderStatus(newOrderStatus);
+
+		if (newOrderStatus === "All") {
+			await defaultFetchOrders();
+		} else {
+			await fetchOrders(newOrderStatus, pageLimit, currentPageNumber);
+		}
 	};
 
-	const createOrdersSummary = (dishNames, dishQuantities) => {
-		const arrDishNames = dishNames.split(",");
-		const arrDishQuantities = dishQuantities.split(",");
-		let orderItems = [];
-		for (let i = 0; i < arrDishNames.length; i++) {
-			const obj = {
-				name: arrDishNames[i],
-				quantity: arrDishQuantities[i],
-			};
-			orderItems.push(obj);
-		}
-		console.log(orderItems);
+	const handleOrdersPageLimit = async (e) => {
+		const newPageLimit = e.target.value;
+		setPageLimit(parseInt(newPageLimit));
 
+		if (newPageLimit === "default") {
+			await defaultFetchOrders();
+		} else {
+			await fetchOrders(orderStatus, newPageLimit, currentPageNumber);
+		}
+	};
+
+	const handleOrdersPageChange = async (e) => {
+		const newCurrentPageNumber = e.target.innerText;
+		setCurrentPageNumber(newCurrentPageNumber);
+
+		await fetchOrders(orderStatus, pageLimit, newCurrentPageNumber);
+	};
+
+	const createOrdersSummary = (orderItems) => {
 		const orderItemsList = orderItems.map((orderItem) => (
 			<Row>
 				<Col style={{ width: "150px", marginLeft: "100px" }}>
-					{orderItem.name} - x{orderItem.quantity}
+					{orderItem.dishName}
 					<hr />
 				</Col>
 			</Row>
@@ -103,85 +224,84 @@ export const RestaurantOrders = () => {
 		return orderItemsList;
 	};
 
-	const handleOrdersFilterChange = (e) => {
-		const filter = e.target.value;
-		let filteredOrders = [];
+	const makeDisplayableDate = (time) => {
+		const d = new Date(time);
+		return d.toDateString();
+	};
 
+	const createDisplayableOrderCards = (orders) => {
+		let ordersList = [];
+		console.log("Orders => ", orders);
 		for (const order of orders) {
-			if (order.STATUS === filter) {
-				filteredOrders.push(
-					<Container>
-						<li className={classes.order}>
-							<Row>
-								<Col>
-									<h3>
-										{order.FNAME} {order.LNAME}
-									</h3>
-									<div>
-										{order.STREET} #{order.HOUSE_NUMBER}
-									</div>
-									<div>
-										{order.CITY} {order.PINCODE}
-									</div>
-									<br />
-									<div>
-										<Col>
-											Contact: {order.CONTACT_NUMBER}
-										</Col>
-									</div>
-								</Col>
+			ordersList.push(
+				<Container>
+					<li className={classes.order}>
+						<Row>
+							<Col>
+								<h3>
+									{order.customer.firstName}{" "}
+									{order.customer.lastName}
+								</h3>
+								<div>
+									{order.customer.street} #
+									{order.customer.apt}
+								</div>
+								<div>{order.customer.city}</div>
+								<br />
+								<div>
+									<Col>
+										Contact: {order.customer.contactNumber}
+									</Col>
+								</div>
+							</Col>
 
-								<Col>
-									<Form.Label>Update status:</Form.Label>
-									<FormControl
-										as="select"
-										onChange={handleOrderStatusChange(
-											order.ID
-										)}
-									>
-										<option value={order.STATUS}>
-											{order.STATUS}
-										</option>
-										<option value="ORDER_PLACED">
-											ORDER_PLACED
-										</option>
-										<option value="PREPARING">
-											PREPARING
-										</option>
-										<option value="ON_THE_WAY">
-											ON_THE_WAY
-										</option>
-										<option value="DELIVERED">
-											DELIVERED
-										</option>
-									</FormControl>
-									<hr />
-									<div>
-										<Col>
-											Current status: {order.STATUS}
-										</Col>
-									</div>
-								</Col>
+							<Col>
+								<Row>Current status: {order.status}</Row>
+								<Row>
+									When: {makeDisplayableDate(order.time)}
+								</Row>
+								<Row>
+									{order.orderNote
+										? `Order notes: ${order.orderNote}`
+										: ""}
+								</Row>
+							</Col>
 
-								<Col>
-									<div>
-										{createOrdersSummary(
-											order.DISH_NAMES,
-											order.DISH_QUANTITIES
-										)}
-									</div>
-									<div style={{ paddingLeft: "100px" }}>
-										<h6>Total: ${order.AMOUNT}</h6>
-									</div>
-								</Col>
-							</Row>
-						</li>
-					</Container>
-				);
-			}
+							<Col>
+								<Form.Label>Update status:</Form.Label>
+								<FormControl
+									as="select"
+									onChange={updateOrderStatus(order._id)}
+								>
+									<option value={order.status}>
+										{order.status}
+									</option>
+									<option value="Order Placed">
+										Order Placed
+									</option>
+									<option value="Preparing">Preparing</option>
+									<option value="On the way">
+										On the way
+									</option>
+									<option value="Delivered">Delivered</option>
+								</FormControl>
+							</Col>
+
+							<Col>
+								<div>
+									{createOrdersSummary(order.orderItems)}
+								</div>
+								<div style={{ paddingLeft: "100px" }}>
+									<h6>Total: ${order.totalAmount}</h6>
+								</div>
+							</Col>
+						</Row>
+					</li>
+				</Container>
+			);
 		}
 
-		setDisplayOrders(filteredOrders);
+		setDisplayOrders(ordersList);
 	};
 
 	return (
@@ -198,21 +318,50 @@ export const RestaurantOrders = () => {
 				Your Restaurant's Orders
 			</h3>
 
-			<FormControl
-				as="select"
-				onChange={handleOrdersFilterChange}
-				style={{ backgroundColor: "whitesmoke" }}
-			>
-				<option>Select order status to view orders</option>
-				<option value="ORDER_PLACED">Order Placed</option>
-				<option value="PREPARING">Preparing</option>
-				<option value="ON_THE_WAY">On the way</option>
-				<option value="DELIVERED">Delivery</option>
-			</FormControl>
+			<Row>
+				<Col>
+					<FormControl
+						as="select"
+						onChange={handleOrdersStatusChange}
+						style={{ backgroundColor: "whitesmoke" }}
+					>
+						<option value="All">
+							Select type of order to view
+						</option>
+						<option value="Order Placed">Order Placed</option>
+						<option value="Preparing">Preparing</option>
+						<option value="Cancelled">Cancelled</option>
+						<option value="On the way">On the way</option>
+						<option value="Picked up">Picked up</option>
+						<option value="Delivered">Delivered</option>
+					</FormControl>
+				</Col>
+				<Col></Col>
+				<Col>
+					<FormControl
+						as="select"
+						onChange={handleOrdersPageLimit}
+						style={{ backgroundColor: "whitesmoke" }}
+					>
+						<option value="default">
+							Select number of results
+						</option>
+						<option value="2">2</option>
+						<option value="5">5</option>
+						<option value="10">10</option>
+					</FormControl>
+				</Col>
+			</Row>
 
 			<section className={classes.orders}>
 				<div className={classes.card}>
 					<ul>{displayOrders}</ul>
+				</div>
+				<br />
+				<div>
+					<Pagination size="sm">
+						{paginationItems.map(createPaginationButtonsHTML)}
+					</Pagination>
 				</div>
 			</section>
 		</Container>

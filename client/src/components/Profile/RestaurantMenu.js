@@ -52,7 +52,7 @@ export const RestaurantMenu = (props) => {
 			restaurantId: restaurantId,
 			name: newDishName,
 			description: newDishDescription,
-			price: parseInt(newDishPrice),
+			price: parseFloat(newDishPrice),
 			category: newDishCategory,
 			foodType: newDishType,
 			ingredients: newDishIngredients,
@@ -60,7 +60,7 @@ export const RestaurantMenu = (props) => {
 		};
 		try {
 			const response = await Axios.post(
-				`http://${awsServer}/createDish`,
+				`http://${awsServer}/create-dish`,
 				payload
 			);
 
@@ -97,7 +97,7 @@ export const RestaurantMenu = (props) => {
 		console.log("About to fetch dishes for => ", restaurantId);
 		try {
 			const response = await Axios.get(
-				`http://${awsServer}/fetchDishes/${restaurantId}`
+				`http://${awsServer}/fetch-dishes/${restaurantId}`
 			);
 			setMenuList(response.data);
 			console.log(
@@ -133,22 +133,22 @@ export const RestaurantMenu = (props) => {
 				<Card.Img
 					variant="top"
 					style={{ height: "30vh" }}
-					src={meal.ITEM_IMAGE_URL}
+					src={meal.dishImgUrl}
 				/>
 				<Card.Body style={{ height: "50vh" }}>
 					<Row>
-						<Card.Title>{meal.NAME}</Card.Title>
+						<Card.Title>{meal.name}</Card.Title>
 					</Row>
 					<Row>
-						<Card.Text>{meal.DESCRIPTION}</Card.Text>
+						<Card.Text>{meal.description}</Card.Text>
 					</Row>
 				</Card.Body>
 				<Card.Footer>
 					<Col>
-						<Card.Text>Cost: ${meal.PRICE}</Card.Text>
+						<Card.Text>Cost: ${meal.price}</Card.Text>
 					</Col>
 					<Col>
-						<Link to={`/dishes/edit/${meal.ID}`}>
+						<Link to={`/dishes/edit/${meal._id}`}>
 							<Button
 								variant="primary"
 								size="sm"

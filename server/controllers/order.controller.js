@@ -198,19 +198,23 @@ export class OrderController {
 
 	// API - to fetch paginated order history for restaurant/orders page
 	fetchRestaurantOrderHistory = async (req, res) => {
-		console.log(req.body);
+		console.log(req.query);
 
-		const restaurantId = req.body.restaurantId;
-		const orderStatus = req.body.orderStatus ? req.body.orderStatus : null;
-		const pageLimit = req.body.pageLimit ? parseInt(req.body.pageLimit) : 5;
-		const requestedPageNumber = parseInt(req.body.pageNumber);
+		const restaurantId = req.query.restaurantId;
+		const orderStatus = req.query.orderStatus
+			? req.query.orderStatus
+			: null;
+		const pageLimit = req.query.pageLimit
+			? parseInt(req.query.pageLimit)
+			: 5;
+		const requestedPageNumber = parseInt(req.query.pageNumber);
 		const skip = pageLimit * (requestedPageNumber - 1);
 
 		console.log("Computed documents to skip => ", skip);
 
 		if (orderStatus === null || orderStatus === "All") {
 			try {
-				const orders = Order.find({ restaurantId: restaurantId })
+				const orders = await Order.find({ restaurantId: restaurantId })
 					.skip(skip)
 					.limit(pageLimit);
 
@@ -225,7 +229,7 @@ export class OrderController {
 		} else {
 			// fetch all orders with a given orderStatus in request
 			try {
-				const orders = Order.find({
+				const orders = await Order.find({
 					$and: [
 						{ restaurantId: restaurantId },
 						{ status: orderStatus },
@@ -269,13 +273,13 @@ export class OrderController {
 	updateRestaurantReceivedOrderStatus = async (req, res) => {
 		console.log(req.body);
 		const orderId = req.body.orderId;
-		const updatedStatus = req.body.status;
+		const updatedStatus = req.body.orderStatus;
 
 		try {
 			await Order.findByIdAndUpdate(orderId, {
 				$set: { status: updatedStatus },
 			});
-			res.status(200).send({ cancelled: true });
+			res.status(200).send("Updated");
 		} catch (err) {
 			console.error("Error => ", err);
 			res.status(500).send("Error when updating order status");

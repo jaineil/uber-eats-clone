@@ -32,9 +32,6 @@ export const RestaurantProfile = (props) => {
 	const [emailId, setEmail] = useState("");
 	const [description, setDescription] = useState("");
 	const [cuisine, setCuisine] = useState("");
-	const [vegan, setVegan] = useState(false);
-	const [veg, setVeg] = useState(false);
-	const [nonVeg, setNonVeg] = useState(false);
 	const [mobileNumber, setMobileNumber] = useState("");
 	const [street, setStreet] = useState("");
 	const [apt, setApt] = useState("");
@@ -44,7 +41,6 @@ export const RestaurantProfile = (props) => {
 	const [restaurantImgLocation, setRestaurantImgLocation] = useState("");
 	const [opensAt, setOpensAt] = useState("");
 	const [closesAt, setClosesAt] = useState("");
-	const [pickupOption, setPickupOption] = useState(false);
 	const [addressId, setAddressId] = useState("");
 
 	const componentIsMounted = useRef(true);
@@ -54,44 +50,27 @@ export const RestaurantProfile = (props) => {
 		console.log("About to fetch meta => ", restaurantId);
 		try {
 			const metaResponse = await Axios.get(
-				`http://${awsServer}/fetchRestaurantMeta/${restaurantId}`
+				`http://${awsServer}/fetch-restaurant/${restaurantId}`
 			);
 
-			const meta = metaResponse.data[0];
+			const meta = metaResponse.data;
 
-			setName(meta.NAME);
-			setEmail(meta.EMAIL_ID);
-			setDescription(meta.DESCRIPTION);
-			setCuisine(meta.CUISINE);
-			setMobileNumber(meta.CONTACT_NUMBER);
-			setRestaurantImgLocation(meta.RESTAURANT_IMAGE_URL);
-			setOpensAt(meta.OPENS_AT);
-			setClosesAt(meta.CLOSES_AT);
-			setPickupOption(meta.PICKUP_OPTION);
-			setVeg(meta.VEG);
-			setNonVeg(meta.NON_VEG);
-			setVegan(meta.VEGAN);
+			setName(meta.name);
+			setEmail(meta.emailId);
+			setDescription(meta.description);
+			setCuisine(meta.cuisine);
+			setMobileNumber(meta.contactNumber);
+			setRestaurantImgLocation(meta.profileImgUrl);
+			setOpensAt(meta.opensAt);
+			setClosesAt(meta.closesAt);
+			setStreet(meta.street);
+			setApt(meta.shopNo);
+			setCity(meta.city);
+			setState(meta.state);
+			setZipcode(meta.zipcode);
+			setAddressId(meta._id);
 
 			console.log(meta);
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const fetchRestaurantAddress = async () => {
-		console.log("About to fetch address => ", restaurantId);
-		try {
-			const addr = await Axios.get(
-				`http://${awsServer}/fetchRestaurantAddress/${restaurantId}`
-			);
-			const addrMeta = addr.data[0];
-			setStreet(addrMeta.STREET);
-			setApt(addrMeta.HOUSE_NUMBER);
-			setCity(addrMeta.CITY);
-			setState(addrMeta.STATE);
-			setZipcode(addrMeta.PINCODE);
-			setAddressId(addrMeta.ID);
-			console.log(addr.data);
 		} catch (err) {
 			console.error(err);
 		}
@@ -106,11 +85,6 @@ export const RestaurantProfile = (props) => {
 
 	useEffect(() => {
 		fetchRestaurantProfile();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
-	useEffect(() => {
-		fetchRestaurantAddress();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -131,21 +105,6 @@ export const RestaurantProfile = (props) => {
 	const updateAccount = async (e) => {
 		e.preventDefault();
 
-		let pickupOptionStatus;
-		let vegStatus;
-		let nonVegStatus;
-		let veganStatus;
-
-		pickupOption === "on"
-			? (pickupOptionStatus = true)
-			: (pickupOptionStatus = false);
-
-		veg === "on" ? (vegStatus = true) : (vegStatus = false);
-
-		nonVeg === "on" ? (nonVegStatus = true) : (nonVegStatus = false);
-
-		vegan === "on" ? (veganStatus = true) : (veganStatus = false);
-
 		const payload = {
 			name: name,
 			emailId: emailId,
@@ -161,19 +120,15 @@ export const RestaurantProfile = (props) => {
 			addressId: addressId,
 			opensAt: opensAt,
 			closesAt: closesAt,
-			pickupOption: pickupOptionStatus,
-			veg: vegStatus,
-			nonVeg: nonVegStatus,
-			vegan: veganStatus,
 			restaurantImageUrl: restaurantImgLocation,
-			restaurantId: parseInt(restaurantId),
+			restaurantId: restaurantId,
 		};
 
 		console.log("Created payload => ", JSON.stringify(payload));
 
 		try {
 			const response = await Axios.post(
-				`http://${awsServer}/updateRestaurant`,
+				`http://${awsServer}/update-restaurant-details`,
 				payload
 			);
 
@@ -300,7 +255,7 @@ export const RestaurantProfile = (props) => {
 						</FormGroup>
 
 						<FormGroup className="mt-3">
-							<FormLabel>Apartment: </FormLabel>
+							<FormLabel>Shop no: </FormLabel>
 							<FormControl
 								type="text"
 								defaultValue={apt}
@@ -378,50 +333,7 @@ export const RestaurantProfile = (props) => {
 							</Row>
 						</FormGroup>
 
-						<FormGroup className="mt-3 mb-3">
-							<Row>
-								<Col>
-									<Form.Switch
-										type="switch"
-										id="form-switch"
-										label="Select to allow pick-ups."
-										onChange={(e) =>
-											setPickupOption(e.target.value)
-										}
-									/>
-								</Col>
-								<Col>
-									<Form.Switch
-										type="switch"
-										id="form-switch"
-										label="Select for Veg."
-										onChange={(e) => setVeg(e.target.value)}
-									/>
-								</Col>
-								<Col>
-									<Form.Switch
-										type="switch"
-										id="form-switch"
-										label="Select for Non-veg."
-										onChange={(e) =>
-											setNonVeg(e.target.value)
-										}
-									/>
-								</Col>
-								<Col>
-									<Form.Switch
-										type="switch"
-										id="form-switch"
-										label="Select for Vegan."
-										onChange={(e) =>
-											setVegan(e.target.value)
-										}
-									/>
-								</Col>
-							</Row>
-						</FormGroup>
-
-						<FormGroup>
+						<FormGroup className="mt-3">
 							<Form.Label>Add restaurant image:</Form.Label>
 							<Form.Control
 								type="file"

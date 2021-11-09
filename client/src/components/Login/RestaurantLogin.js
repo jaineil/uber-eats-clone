@@ -37,9 +37,14 @@ export const RestaurantLogin = (props) => {
 
 		console.log("Created payload! => ", JSON.stringify(payload));
 		try {
-			const response = await Axios.post(
-				`http://${awsServer}/restaurantSignin`,
-				payload
+			const response = await Axios.get(
+				`http://${awsServer}/validate-restaurant`,
+				{
+					params: {
+						emailId: emailId,
+						password: password,
+					},
+				}
 			);
 			console.log(response);
 			console.log("Successfully login");

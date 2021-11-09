@@ -43,17 +43,17 @@ export const EditDish = (props) => {
 		console.log("About to fetch dish => ", mealId);
 		try {
 			const response = await Axios.get(
-				`http://${awsServer}/fetchOneDish/${mealId}`
+				`http://${awsServer}/fetch-dish/${mealId}`
 			);
 
-			const mealMeta = response.data[0];
-
-			setName(mealMeta.NAME);
-			setDescription(mealMeta.DESCRIPTION);
-			setIngredients(mealMeta.INGREDIENTS);
-			setPrice(mealMeta.PRICE);
-			setCategory(mealMeta.CATEGORY);
-			setDishImgUrl(mealMeta.ITEM_IMAGE_URL);
+			const mealMeta = response.data;
+			console.log(mealMeta);
+			setName(mealMeta.name);
+			setDescription(mealMeta.description);
+			setIngredients(mealMeta.ingredients);
+			setPrice(mealMeta.price);
+			setCategory(mealMeta.category);
+			setDishImgUrl(mealMeta.dishImgUrl);
 		} catch (err) {
 			console.error(err);
 		}
@@ -84,7 +84,7 @@ export const EditDish = (props) => {
 		const payload = {
 			name: name,
 			description: description,
-			price: parseInt(price),
+			price: parseFloat(price),
 			category: category,
 			ingredients: ingredients,
 			dishImgUrl: dishImgUrl,
@@ -95,7 +95,7 @@ export const EditDish = (props) => {
 
 		try {
 			const response = await Axios.post(
-				`http://${awsServer}/updateOneDish`,
+				`http://${awsServer}/update-dish`,
 				payload
 			);
 
@@ -214,11 +214,11 @@ export const EditDish = (props) => {
 								defaultValue={category}
 							>
 								<option>Select category</option>
-								<option value="APPETIZER">Appetizer</option>
-								<option value="SALAD">Salad</option>
-								<option value="MAIN COURSE">Main Course</option>
-								<option value="DESSERT">Dessert</option>
-								<option value="BEVERAGES">Beverages</option>
+								<option value="appetizer">Appetizer</option>
+								<option value="salad">Salad</option>
+								<option value="mainCourse">Main Course</option>
+								<option value="dessert">Dessert</option>
+								<option value="beverages">Beverages</option>
 							</FormControl>
 						</Form.Group>
 

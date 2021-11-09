@@ -39,6 +39,7 @@ export const RestaurantRegistration = (props) => {
 	const [opensAt, setOpensAt] = useState("");
 	const [closesAt, setClosesAt] = useState("");
 	const [pickupOption, setPickupOption] = useState(false);
+	const [deliveryOption, setDeliveryOption] = useState();
 
 	const pushRestaurantImgToAWS = async (e) => {
 		try {
@@ -58,6 +59,7 @@ export const RestaurantRegistration = (props) => {
 		e.preventDefault();
 
 		let pickupOptionStatus;
+		let deliveryOptionStatus;
 		let vegStatus;
 		let nonVegStatus;
 		let veganStatus;
@@ -67,6 +69,10 @@ export const RestaurantRegistration = (props) => {
 		pickupOption === "on"
 			? (pickupOptionStatus = true)
 			: (pickupOptionStatus = false);
+
+		deliveryOption === "on"
+			? (deliveryOptionStatus = true)
+			: (deliveryOptionStatus = false);
 
 		veg === "on" ? (vegStatus = true) : (vegStatus = false);
 
@@ -80,7 +86,7 @@ export const RestaurantRegistration = (props) => {
 			password: password,
 			description: description,
 			cuisine: cuisine,
-			mobileNumber: String(mobileNumber),
+			contactNumber: String(mobileNumber),
 			street: street,
 			apt: apt,
 			city: city,
@@ -89,6 +95,7 @@ export const RestaurantRegistration = (props) => {
 			country: "United States",
 			opensAt: opensAt,
 			closesAt: closesAt,
+			deliveryOption: deliveryOptionStatus,
 			pickupOption: pickupOptionStatus,
 			vegStatus: vegStatus,
 			nonVegStatus: nonVegStatus,
@@ -100,7 +107,7 @@ export const RestaurantRegistration = (props) => {
 
 		try {
 			const response = await Axios.post(
-				`http://${awsServer}/createRestaurant`,
+				`http://${awsServer}/create-restaurant`,
 				payload
 			);
 			console.log(
@@ -334,6 +341,9 @@ export const RestaurantRegistration = (props) => {
 										type="switch"
 										id="form-switch"
 										label="Offer delivery."
+										onChange={(e) =>
+											setDeliveryOption(e.target.value)
+										}
 									/>
 								</Col>
 								<Col>
