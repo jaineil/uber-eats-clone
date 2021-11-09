@@ -286,11 +286,18 @@ export class RestaurantController {
 	// API - to handle search queries on customer dashboard searchbar
 	// comes in req.query since passed as params
 	search = async (req, res) => {
+		console.log(req.query);
+
 		const query = req.query.searchString;
 		const queryString = query.toLowerCase();
 
-		if (queryString === "pickup" || "pick up" || "pick-up") {
+		if (
+			queryString === "pickup" ||
+			queryString === "pick up" ||
+			queryString === "pick-up"
+		) {
 			try {
+				console.log("1");
 				const response = await Restaurant.find({ pickupOption: true });
 				console.log(JSON.stringify(response));
 				res.status(200).send(response);
@@ -311,23 +318,24 @@ export class RestaurantController {
 			}
 		} else {
 			try {
+				console.log("About to do overall searching!");
 				const response = await Restaurant.find({
 					$or: [
 						{
 							name: {
-								$regex: searchString,
+								$regex: queryString,
 								$options: "i",
 							},
 						},
 						{
 							"dishes.name": {
-								$regex: searchString,
+								$regex: queryString,
 								$options: "i",
 							},
 						},
 						{
-							"addresses.city": {
-								$regex: searchString,
+							city: {
+								$regex: queryString,
 								$options: "i",
 							},
 						},
