@@ -35,17 +35,21 @@ export const Welcome = () => {
 				>
 					<Card
 						style={{
-							width: "24rem",
-							height: "12rem",
+							width: "30rem",
+							height: "15rem",
 							backgroundColor: "black",
 						}}
 						className="wel-card"
 					>
 						<Card.Body>
 							<Card.Title
-								style={{ color: "white", textAlign: "center" }}
+								style={{
+									color: "white",
+									textAlign: "center",
+									fontWeight: "bolder",
+								}}
 							>
-								Order
+								Order?
 							</Card.Title>
 							<Card.Text
 								style={{ color: "white", textAlign: "center" }}
@@ -53,15 +57,31 @@ export const Welcome = () => {
 								Order breakfast, lunch and dinner.
 							</Card.Text>
 
-							<Button
-								variant="primary"
-								onClick={() => handleClick("/customerSignup")}
-								className="wel-btn"
-							>
-								New customer?
-								<br />
-								Go to sign up.
-							</Button>
+							<Row>
+								<Col>
+									``
+									<Button
+										variant="primary"
+										onClick={() =>
+											handleClick("/customerSignin")
+										}
+										className="wel-btn"
+									>
+										Login.
+									</Button>
+								</Col>
+								<Col>
+									<Button
+										variant="primary"
+										onClick={() =>
+											handleClick("/customerSignup")
+										}
+										className="wel-btn"
+									>
+										Sign up.
+									</Button>
+								</Col>
+							</Row>
 						</Card.Body>
 					</Card>
 				</Col>
@@ -76,33 +96,51 @@ export const Welcome = () => {
 				>
 					<Card
 						style={{
-							width: "24rem",
-							height: "12rem",
+							width: "30rem",
+							height: "15rem",
 							backgroundColor: "black",
 						}}
 						className="wel-card"
 					>
 						<Card.Body>
 							<Card.Title
-								style={{ color: "white", textAlign: "center" }}
+								style={{
+									color: "white",
+									textAlign: "center",
+									fontWeight: "bolder",
+								}}
 							>
-								Deliver
+								Deliver?
 							</Card.Title>
 							<Card.Text
 								style={{ color: "white", textAlign: "center" }}
 							>
 								Deliver breakfast, lunch and dinner.
 							</Card.Text>
-
-							<Button
-								variant="primary"
-								onClick={() => handleClick("/restaurantSignup")}
-								className="wel-btn"
-							>
-								New restaurant?
-								<br />
-								Go to sign up.
-							</Button>
+							<Row>
+								<Col>
+									<Button
+										variant="primary"
+										onClick={() =>
+											handleClick("/restaurantSignin")
+										}
+										className="wel-btn"
+									>
+										Login.
+									</Button>
+								</Col>
+								<Col>
+									<Button
+										variant="primary"
+										onClick={() =>
+											handleClick("/restaurantSignup")
+										}
+										className="wel-btn"
+									>
+										Sign up.
+									</Button>
+								</Col>
+							</Row>
 						</Card.Body>
 					</Card>
 				</Col>
