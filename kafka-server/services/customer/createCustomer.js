@@ -1,8 +1,7 @@
-import Customer from '../db/models/customer.model.js';
+import Customer from "../../db/models/customer.model.js";
 
 export const createCustomer = async (data, callback) => {
-	
-	console.log('Incoming data => ', data);
+	console.log("Incoming data => ", data);
 
 	const createCustomerReqObj = {
 		firstName: data.firstName,
@@ -18,9 +17,9 @@ export const createCustomer = async (data, callback) => {
 			zipcode: data.zipcode,
 			state: data.state,
 			country: data.country,
-			type: data.type
-		}
-	}
+			type: data.type,
+		},
+	};
 
 	const newCustomer = new Customer({
 		firstName: createCustomerReqObj.firstName,
@@ -29,17 +28,17 @@ export const createCustomer = async (data, callback) => {
 		password: createCustomerReqObj.password,
 		dob: createCustomerReqObj.dob,
 		contactNumber: createCustomerReqObj.contactNumber,
-		addresses: createCustomerReqObj.address
-	})
+		addresses: createCustomerReqObj.address,
+	});
 
 	try {
 		const response = await newCustomer.save();
 		console.log(JSON.stringify(response));
 		// res.status(200).send(response);
-		callback(null, response)
+		callback(null, response);
 	} catch (err) {
-		console.error('Error => ', err);
+		console.error("Error => ", err);
 		// res.status(500).send('Could not create customer');
-		callback(null, 'Internal server error: Could not create customer');
+		callback(null, "Internal server error: Could not create customer");
 	}
 };

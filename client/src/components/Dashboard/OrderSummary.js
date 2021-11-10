@@ -34,7 +34,7 @@ export const OrderSummary = (props) => {
 	const [show, setShow] = useState(false);
 	const [addressIds, setAddressIds] = useState([]);
 	const [selectedAddressId, setSelectedAddressId] = useState("");
-	const [note, setNote] = useState("")
+	const [note, setNote] = useState("");
 	const [street, setStreet] = useState("");
 	const [apt, setApt] = useState("");
 	const [city, setCity] = useState("");
@@ -82,14 +82,13 @@ export const OrderSummary = (props) => {
 
 	const addressList = addressIds.map((addr) => (
 		<option value={addr.id}>
-			{addr.apt}, {addr.street}, {addr.city}, {addr.state},{" "}
-			{addr.zipcode}
+			{addr.apt}, {addr.street}, {addr.city}, {addr.state}, {addr.zipcode}
 		</option>
 	));
 
 	const selectAddressHandler = (e) => {
 		// e.preventDefault();
-		console.log('Address Id about to be handled', e.target.value)
+		console.log("Address Id about to be handled", e.target.value);
 		setSelectedAddressId(e.target.value);
 	};
 
@@ -104,10 +103,7 @@ export const OrderSummary = (props) => {
 			country: "United States",
 		};
 		try {
-			await Axios.post(
-				`http://${awsServer}/addNewCustomerAddress`,
-				payload
-			);
+			await Axios.post(`http://${awsServer}/add-address`, payload);
 		} catch (err) {
 			console.error("Error when registering new customer => ", err);
 		}
@@ -124,10 +120,13 @@ export const OrderSummary = (props) => {
 				totalAmount: cart.total,
 				addressId: selectedAddressId,
 				items: cart.cartItems,
-				note: note
+				note: note,
 			};
-			console.log('With a special note for restaurant => ', payload);
-			const res = await Axios.post(`http://${awsServer}/create-order`, payload);
+			console.log("With a special note for restaurant => ", payload);
+			const res = await Axios.post(
+				`http://${awsServer}/create-order`,
+				payload
+			);
 			console.log("Response from API => ", res);
 		} else {
 			const payload = {
@@ -139,7 +138,10 @@ export const OrderSummary = (props) => {
 				items: cart.cartItems,
 			};
 			console.log("No special note for the restaurant => ", payload);
-			const res = await Axios.post(`http://${awsServer}/create-order`, payload);
+			const res = await Axios.post(
+				`http://${awsServer}/create-order`,
+				payload
+			);
 			console.log("Response from API => ", res);
 		}
 	};
@@ -160,9 +162,13 @@ export const OrderSummary = (props) => {
 						{addressList}
 					</FormControl>
 					<br />
-					<FormControl className="mb-3" type="text" placeholder="Add note for the restaurant" onChange={(e) => {
-									setNote(e.target.value);
-								}}
+					<FormControl
+						className="mb-3"
+						type="text"
+						placeholder="Add note for the restaurant"
+						onChange={(e) => {
+							setNote(e.target.value);
+						}}
 					/>
 					<h5>Don't see your address?</h5>
 					<h5>Add a new address:</h5>

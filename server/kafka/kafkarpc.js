@@ -1,110 +1,106 @@
-import crypto from 'crypto';
-import { ConnectionProvider } from './connection.js';
+import crypto from "crypto";
+import { ConnectionProvider } from "./connection.js";
 
-const TIMEOUT=8000; // time to wait for response in ms
+const TIMEOUT = 12000; // time to wait for response in ms
 let self;
 
 export class KafkaRPC {
-    constructor() {
-        self = this;
-        this.connection = new ConnectionProvider();
-        this.requests = {}; // hash to store request in wait for response
-        this.response_queue = false; // placeholder for the future queue
-        this.producer = this.connection.getProducer();
-    }
+	constructor() {
+		self = this;
+		this.connection = new ConnectionProvider();
+		this.requests = {}; // hash to store request in wait for response
+		this.response_queue = false; // placeholder for the future queue
+		this.producer = this.connection.getProducer();
+	}
 
-    makeRequest(topicName, content, callback) {
+	makeRequest(topicName, content, callback) {
+		self = this;
+		// generate a unique correlation id for this call
+		const correlationId = crypto.randomBytes(16).toString("hex");
 
-        self = this;
-        // generate a unique correlation id for this call
-        const correlationId = crypto.randomBytes(16).toString('hex');
+		// create a timeout for what should happen if we don't get a response
+		const tId = setTimeout(
+			(correlationId) => {
+				// if this ever gets called we didn't get a response in a
+				// timely fashion
+				console.log("timeout");
 
-        // create a timeout for what should happen if we don't get a response
-        const tId = setTimeout((correlationId) => {
-            
-            // if this ever gets called we didn't get a response in a
-            // timely fashion
-            console.log('timeout');
+				callback(
+					new Error("Timed out correlation id => " + correlationId)
+				);
 
-            callback(new Error('Timed out correlation id => ' + correlationId));
+				// delete the entry from hash
+				delete self.requests[correlationId];
+			},
+			TIMEOUT,
+			correlationId
+		);
 
-            // delete the entry from hash
-            delete self.requests[correlationId];
+		// create a request entry to store in a hash
+		const entry = {
+			callback: callback,
+			timeout: tId, // the id for the timeout so we can clear it
+		};
 
-        }, TIMEOUT, correlationId);
+		// put the entry in the hash so we can match the response later
+		self.requests[correlationId] = entry;
 
-        // create a request entry to store in a hash
-        const entry = {
-            callback: callback,
-            timeout: tId // the id for the timeout so we can clear it
-        };
+		//make sure we have a response topic
+		self.setupResponseQueue(self.producer, topicName, () => {
+			const payloads = [
+				{
+					topic: topicName,
+					messages: JSON.stringify({
+						correlationId: correlationId,
+						replyTo: "response_topic",
+						data: content,
+					}),
+					partition: 0,
+				},
+			];
+			console.log("In response!");
+			console.log(self.producer.ready);
+			self.producer.send(payloads, (err, data) => {
+				if (err) console.log("Broke when sending from producer", err);
+				console.log(data);
+			});
+		});
+	}
 
-        // put the entry in the hash so we can match the response later
-        self.requests[correlationId] = entry;
+	setupResponseQueue = (producer, topicName, next) => {
+		// don't mess around if we have a queue
+		if (this.response_queue) return next();
 
-        //make sure we have a response topic
-        self.setupResponseQueue(self.producer, topicName, () => {
-            
-            const payloads = [
-                {
-                    topic: topicName,
-                    messages: JSON.stringify({
-                        correlationId: correlationId,
-                        replyTo: 'response_topic',
-                        data: content
-                    }),
-                    partition: 0
-                }
-            ];
-            console.log("In response!");
-            console.log(self.producer.ready);
-            self.producer.send(payloads, (err, data) => {
-                
-                if (err)
-                    console.log(err);
-                
-                console.log(data)
-            });
-        });
-    }
+		self = this;
 
-    setupResponseQueue = (producer, topicName, next) => {
-        
-        // don't mess around if we have a queue
-        if (this.response_queue)
-            return next();
+		// subscribe to messages
+		const consumer = self.connection.getConsumer("response_topic");
 
-        self = this;
+		consumer.on("message", (message) => {
+			console.log("Message received");
+			const data = JSON.parse(message.value);
 
-        // subscribe to messages
-        const consumer = self.connection.getConsumer('response_topic');
+			// get the correlationId
+			const correlationId = data.correlationId;
 
-        consumer.on('message', (message) => {
-            console.log('Message received');
-            const data = JSON.parse(message.value);
+			// is it a response to a pending request
+			if (correlationId in self.requests) {
+				// retrieve the request entry
+				const entry = self.requests[correlationId];
 
-            // get the correlationId
-            const correlationId = data.correlationId;
+				//make sure we don't timeout by clearing it
+				clearTimeout(entry.timeout);
 
-            // is it a response to a pending request
-            if (correlationId in self.requests) {
+				//delete the entry from hash
+				delete self.requests[correlationId];
 
-                // retrieve the request entry
-                const entry = self.requests[correlationId];
+				//callback, no err
+				entry.callback(null, data.data);
+			}
+		});
 
-                //make sure we don't timeout by clearing it
-                clearTimeout(entry.timeout);
-                
-                //delete the entry from hash
-                delete self.requests[correlationId];
-                
-                //callback, no err
-                entry.callback(null, data.data);
-            }
-        });
-
-        self.response_queue = true;
-        console.log('Returning next!');
-        return next();
-    }
+		self.response_queue = true;
+		console.log("Returning next!");
+		return next();
+	};
 }

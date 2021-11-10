@@ -56,13 +56,16 @@ export const CustomerDashboard = (props) => {
 
 	const fetchRestaurants = async () => {
 		const currLocation = await fetchCustomerLocation();
+		console.log("Fetched location => ", currLocation);
+		setLocation(currLocation);
 		console.log("About to fetch restaurants");
 		try {
 			const response = await Axios.get(
-				`http://${awsServer}/restaurants`, {
+				`http://${awsServer}/restaurants`,
+				{
 					params: {
-						city: currLocation
-					}
+						city: currLocation,
+					},
 				}
 			);
 			console.log(response);
@@ -83,6 +86,7 @@ export const CustomerDashboard = (props) => {
 	const fetchCustomerLocation = async () => {
 		console.log("About to fetch customer location");
 		try {
+			console.log("CUST ID ", customerId);
 			const response = await Axios.get(
 				`http://${awsServer}/fetch-customer-location/${customerId}`
 			);
@@ -94,11 +98,6 @@ export const CustomerDashboard = (props) => {
 			console.log("Could not fetch customer location");
 		}
 	};
-
-	useEffect(() => {
-		fetchCustomerLocation();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const filteringHandler = (filters) => {
 		let temp = [];
@@ -113,11 +112,11 @@ export const CustomerDashboard = (props) => {
 		) {
 			for (const r of searchedRestaurants) {
 				if (
-					(r.VEG && filters.veg) ||
-					(r.NON_VEG && filters.nonVeg) ||
-					(r.VEGAN && filters.vegan) ||
-					(r.PICKUP_OPTION && filters.pickupState) ||
-					(r.DELIVERY_OPTION && filters.deliveryState)
+					(r.veg && filters.veg) ||
+					(r.nonVeg && filters.nonVeg) ||
+					(r.vegan && filters.vegan) ||
+					(r.pickupOption && filters.pickupState) ||
+					(r.deliveryOption && filters.deliveryState)
 				) {
 					console.log("Pushing ", r.NAME);
 					temp.push(r);
@@ -341,9 +340,11 @@ export const CustomerDashboard = (props) => {
 						</Card.Title>
 					</Row>
 					<Row>
-							<Card.Text>
-								<h6>Open from: {resto.opensAt} to {resto.closesAt}</h6>
-							</Card.Text>
+						<Card.Text>
+							<h6>
+								Open from: {resto.opensAt} to {resto.closesAt}
+							</h6>
+						</Card.Text>
 						<Card.Text>
 							<h5>{resto.city}</h5>
 						</Card.Text>
