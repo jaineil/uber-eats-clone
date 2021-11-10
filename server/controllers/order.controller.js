@@ -251,7 +251,7 @@ export class OrderController {
 	// API - to handle cancellation of order by customer
 	// Allows cancellation in Order Placed state before restaurant takes it to Preparing state
 	handleCustomerOrderCancellation = async (req, res) => {
-		const orderId = req.body.orderId;
+		const orderId = req.params.orderId;
 
 		try {
 			const response = await Order.findById(orderId);

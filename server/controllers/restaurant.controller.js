@@ -297,7 +297,6 @@ export class RestaurantController {
 			queryString === "pick-up"
 		) {
 			try {
-				console.log("1");
 				const response = await Restaurant.find({ pickupOption: true });
 				console.log(JSON.stringify(response));
 				res.status(200).send(response);

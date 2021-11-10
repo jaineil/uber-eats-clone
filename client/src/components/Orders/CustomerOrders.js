@@ -1,6 +1,13 @@
 import { useRef, useState, useEffect } from "react";
 import { useHistory } from "react-router";
-import { Row, Col, Container, FormControl, Pagination } from "react-bootstrap";
+import {
+	Row,
+	Col,
+	Container,
+	FormControl,
+	Pagination,
+	Button,
+} from "react-bootstrap";
 import cookie from "react-cookies";
 import Axios from "axios";
 import CustNavbar from "../Navbar/CustNavbar";
@@ -161,6 +168,20 @@ export const CustomerOrders = (props) => {
 		await fetchOrders(orderStatus, pageLimit, newCurrentPageNumber);
 	};
 
+	const handleOrderCancellation = (id) => async (e) => {
+		const orderId = id;
+		try {
+			const response = await Axios.post(
+				`http://${awsServer}/cancel-order/${orderId}`
+			);
+			console.log(response);
+			window.location.reload(false);
+		} catch (err) {
+			console.error(err);
+			console.log("Could not cancel order");
+		}
+	};
+
 	const createPaginationButtons = (totalPages, updatedCurrentPageNumber) => {
 		let items = [];
 
@@ -238,6 +259,25 @@ export const CustomerOrders = (props) => {
 										? `Order notes: ${order.orderNote}`
 										: ""}
 								</Row>
+
+								{order.status === "Order Placed" ? (
+									<Button
+										variant="primary"
+										size="sm"
+										style={{
+											backgroundColor: "black",
+											border: "black",
+										}}
+										onClick={handleOrderCancellation(
+											order._id
+										)}
+									>
+										{" "}
+										Cancel
+									</Button>
+								) : (
+									""
+								)}
 							</Col>
 
 							<Col>
@@ -260,7 +300,6 @@ export const CustomerOrders = (props) => {
 	return (
 		<Container fluid>
 			<CustNavbar />
-			{console.log("ORDER STATUS => ", orderStatus)}
 			<h3
 				className="mt-3"
 				style={{
