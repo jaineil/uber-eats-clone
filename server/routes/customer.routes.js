@@ -6,7 +6,7 @@ const customerController = new CustomerController();
 
 // customerRoutes.post("/create-customer", customerController.createCustomer);
 
-customerRoutes.post("/update-customer", customerController.updateCustomerMeta);
+// customerRoutes.post("/update-customer", customerController.updateCustomerMeta);
 
 customerRoutes.get(
 	"/validate-customer",
@@ -18,10 +18,10 @@ customerRoutes.get(
 // 	customerController.fetchCurrentCustomerLocation
 // );
 
-customerRoutes.get(
-	"/fetch-customer/:customerId",
-	customerController.fetchCustomerMeta
-);
+// customerRoutes.get(
+// 	"/fetch-customer/:customerId",
+// 	customerController.fetchCustomerMeta
+// );
 
 // customerRoutes.post(
 // 	"/add-favorite",

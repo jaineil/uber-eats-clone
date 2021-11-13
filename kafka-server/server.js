@@ -21,6 +21,8 @@ import { searchRestaurants } from "./services/restaurant/searchRestaurants.js";
 import { fetchRestaurantOrderHistory } from "./services/order/fetchRestaurantOrderHistory.js";
 import { updateRestaurantReceivedOrderStatus } from "./services/order/updateRestaurantReceivedOrderStatus.js";
 import { handleCustomerOrderCancellation } from "./services/order/handleCustomerOrderCancellation.js";
+import { updateCustomer } from "./services/customer/updateCustomer.js";
+import { fetchCustomerMeta } from "./services/customer/fetchCustomerMeta.js";
 
 try {
 	mongoose.connect(uri, {
@@ -68,6 +70,8 @@ const handleTopicRequest = (topicName, functionName) => {
 };
 
 handleTopicRequest("create-customer", createCustomer);
+handleTopicRequest("update-customer", updateCustomer);
+handleTopicRequest("fetch-customer", fetchCustomerMeta);
 handleTopicRequest("fetch-customer-location", fetchCustomerLocation);
 handleTopicRequest("fetch-restaurants", fetchRestaurants);
 handleTopicRequest("fetch-restaurant", fetchRestaurantMeta);

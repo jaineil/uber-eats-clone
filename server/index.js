@@ -65,6 +65,41 @@ app.post("/create-customer", async (req, res) => {
 	});
 });
 
+app.post("/update-customer", async (req, res) => {
+	console.log("Inside update-customer route");
+	make_request("update-customer", req.body, (err, results) => {
+		if (err) {
+			console.error(err);
+			res.json({
+				status: "Error",
+				msg: "System error, try again",
+			});
+		} else {
+			res.json(results);
+			console.log(results);
+			res.end();
+		}
+	});
+});
+
+app.get("/fetch-customer/:customerId", async (req, res) => {
+	console.log("Inside fetch-customer route");
+	make_request("fetch-customer", req.params, (err, results) => {
+		if (err) {
+			console.error(err);
+			res.json({
+				status: "Error",
+				msg: "System error, try again",
+			});
+		} else {
+			console.log("Fetched user default location successfully!");
+			console.log(results);
+			res.json(results);
+			res.end();
+		}
+	});
+});
+
 app.get("/fetch-customer-location/:customerId", async (req, res) => {
 	console.log("Inside fetch-customer-location route");
 	make_request("fetch-customer-location", req.params, (err, results) => {
