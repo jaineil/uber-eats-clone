@@ -12,6 +12,15 @@ import { computePagination } from "./services/order/computePagination.js";
 import { fetchCustomerOrderHistory } from "./services/order/fetchCustomerOrderHistory.js";
 import { addCustomerFavoriteRestaurant } from "./services/customer/addCustomerFavoriteRestaurant.js";
 import { fetchCustomerFavorites } from "./services/customer/fetchCustomerFavorites.js";
+import { createRestaurant } from "./services/restaurant/createRestaurant.js";
+import { createDish } from "./services/restaurant/createDish.js";
+import { fetchAllDishes } from "./services/restaurant/fetchAllDishes.js";
+import { fetchOneDish } from "./services/restaurant/fetchDish.js";
+import { updateDish } from "./services/restaurant/updateDish.js";
+import { searchRestaurants } from "./services/restaurant/searchRestaurants.js";
+import { fetchRestaurantOrderHistory } from "./services/order/fetchRestaurantOrderHistory.js";
+import { updateRestaurantReceivedOrderStatus } from "./services/order/updateRestaurantReceivedOrderStatus.js";
+import { handleCustomerOrderCancellation } from "./services/order/handleCustomerOrderCancellation.js";
 
 try {
 	mongoose.connect(uri, {
@@ -67,5 +76,14 @@ handleTopicRequest("add-customer-address", addAlternateCustomerAddress);
 handleTopicRequest("create-order", createOrder);
 handleTopicRequest("compute-pages", computePagination);
 handleTopicRequest("customer-order-history", fetchCustomerOrderHistory);
+handleTopicRequest("cancel-order", handleCustomerOrderCancellation);
 handleTopicRequest("add-favorite", addCustomerFavoriteRestaurant);
 handleTopicRequest("fetch-favorites", fetchCustomerFavorites);
+handleTopicRequest("search", searchRestaurants);
+handleTopicRequest("create-restaurant", createRestaurant);
+handleTopicRequest("create-dish", createDish);
+handleTopicRequest("fetch-dish", fetchOneDish);
+handleTopicRequest("update-dish", updateDish);
+handleTopicRequest("fetch-dishes", fetchAllDishes);
+handleTopicRequest("restaurant-order-history", fetchRestaurantOrderHistory);
+handleTopicRequest("update-order-status", updateRestaurantReceivedOrderStatus);

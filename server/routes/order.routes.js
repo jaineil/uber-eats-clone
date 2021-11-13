@@ -13,19 +13,19 @@ const orderController = new OrderController();
 // 	orderController.fetchCustomerOrderHistory
 // );
 
-orderRoutes.get(
-	"/restaurant-order-history",
-	orderController.fetchRestaurantOrderHistory
-);
+// orderRoutes.get(
+// 	"/restaurant-order-history",
+// 	orderController.fetchRestaurantOrderHistory
+// );
 
-orderRoutes.post(
-	"/cancel-order/:orderId",
-	orderController.handleCustomerOrderCancellation
-);
+// orderRoutes.post(
+// 	"/cancel-order/:orderId",
+// 	orderController.handleCustomerOrderCancellation
+// );
 
-orderRoutes.post(
-	"/update-order-status",
-	orderController.updateRestaurantReceivedOrderStatus
-);
+// orderRoutes.post(
+// 	"/update-order-status",
+// 	orderController.updateRestaurantReceivedOrderStatus
+// );
 
 export default orderRoutes;
