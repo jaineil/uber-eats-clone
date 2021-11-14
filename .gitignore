@@ -1,6 +1,6 @@
 node_modules
 db.config.js
-serverConfig.js
-kafkaServerConfig.js
-awsIP.js
+# serverConfig.js
+# kafkaServerConfig.js
+# awsIP.js
 awsConfig.js
