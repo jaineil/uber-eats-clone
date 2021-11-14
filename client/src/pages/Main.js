@@ -15,6 +15,7 @@ import { RestaurantOrders } from "../components/Orders/RestaurantOrders";
 import { CustomerDashboard } from "../components/Dashboard/CustomerDashboard";
 import { CustomerFavorites } from "../components/Dashboard/CustomerFavorites";
 import { CustomerOrders } from "../components/Orders/CustomerOrders";
+import { CustomerProfile } from "../components/Profile/CustomerProfile";
 //Main Component for routing all components
 
 export default class Main extends Component {
@@ -33,6 +34,10 @@ export default class Main extends Component {
 				<Route
 					path="/favorites/:customerId"
 					component={CustomerFavorites}
+				/>
+				<Route
+					path="/profile/:customerId"
+					component={CustomerProfile}
 				/>
 				<Route path="/order" component={OrderSummary} />
 				<Route

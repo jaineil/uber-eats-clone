@@ -9,10 +9,8 @@ export const updateCustomer = async (data, callback) => {
 		firstName: data.firstName,
 		lastName: data.lastName,
 		emailId: data.emailId,
-		password: data.password,
-		dob: data.dob,
-		contactNumber: data.contactNumber,
-		profileImg: data.img,
+		contactNumber: data.mobileNumber,
+		profileImg: data.customerImgUrl,
 	};
 
 	const updateCustomerAddressObj = {
@@ -26,10 +24,19 @@ export const updateCustomer = async (data, callback) => {
 	};
 
 	try {
-		await Customer.findByIdAndUpdate(customerId, {
-			...updateCustomerDetailsObj,
-			$set: { "addresses.0": updateCustomerAddressObj },
-		});
+		await Customer.updateOne(
+			{ _id: customerId },
+			{
+				firstName: updateCustomerDetailsObj.firstName,
+				lastName: updateCustomerDetailsObj.lastName,
+				emailId: updateCustomerDetailsObj.emailId,
+				contactNumber: updateCustomerDetailsObj.contactNumber,
+				profileImg: updateCustomerDetailsObj.profileImg,
+				$set: {
+					"addresses.0": updateCustomerAddressObj,
+				},
+			}
+		);
 
 		callback(null, "Updated");
 	} catch (err) {
