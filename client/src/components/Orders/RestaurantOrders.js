@@ -279,6 +279,7 @@ export const RestaurantOrders = () => {
 									<option value="Order Placed">
 										Order Placed
 									</option>
+									<option value="Cancelled">Cancelled</option>
 									<option value="Preparing">Preparing</option>
 									<option value="On the way">
 										On the way
