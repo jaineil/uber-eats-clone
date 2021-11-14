@@ -66,10 +66,6 @@ export class RestaurantController {
 				res.status(200).send({
 					validCredentials: true,
 				});
-
-				res.status(200).send({
-					validCredentials: true,
-				});
 			} else {
 				console.log("User mismatch");
 				res.status(400).send({ validCredentials: false });
