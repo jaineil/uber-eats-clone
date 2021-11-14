@@ -118,7 +118,7 @@ export const CustomerDashboard = (props) => {
 					(r.pickupOption && filters.pickupState) ||
 					(r.deliveryOption && filters.deliveryState)
 				) {
-					console.log("Pushing ", r.NAME);
+					console.log("Pushing ", r.name);
 					temp.push(r);
 					setDisplayRestaurants(temp);
 				}
