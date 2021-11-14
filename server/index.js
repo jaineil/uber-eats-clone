@@ -8,9 +8,10 @@ import { make_request } from "./kafka/client.js";
 import customerRoutes from "./routes/customer.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import restaurantRoutes from "./routes/restaurant.routes.js";
+import { serverIP } from "./serverConfig.js";
 
 const app = express();
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: `http://${serverIP}:3000`, credentials: true }));
 app.use(cookieParser());
 
 app.use(
