@@ -1,4 +1,4 @@
-# uber-eats-clone
+# UberEats Web App Clone
 
 - CMPE273 - Enterprise Distributed Systems - Lab 2
 - Title: UberEats Web Application Clone
