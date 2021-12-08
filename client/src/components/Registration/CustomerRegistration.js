@@ -33,9 +33,9 @@ export const CustomerRegistration = (props) => {
 
 	const createAccount = async (e) => {
 		e.preventDefault();
-		console.log('Before ', dateOfBirth)
+		console.log("Before ", dateOfBirth);
 		const dob = new Date(dateOfBirth);
-		console.log('After ', dob);
+		console.log("After ", dob);
 		const payload = {
 			firstName: firstName,
 			lastName: lastName,
@@ -49,7 +49,7 @@ export const CustomerRegistration = (props) => {
 			zipcode: zipcode,
 			state: state,
 			country: "United States",
-			type: "default"
+			type: "default",
 		};
 		console.log("Created payload!");
 		try {
@@ -94,7 +94,6 @@ export const CustomerRegistration = (props) => {
 			>
 				<Col>
 					<Form onSubmit={createAccount} className="p2">
-
 						<FormGroup className="mt-3">
 							<FormLabel>First Name: </FormLabel>
 							<FormControl
@@ -203,6 +202,16 @@ export const CustomerRegistration = (props) => {
 											setZipcode(e.target.value);
 										}}
 									/>
+								</FormGroup>
+							</Col>
+							<Col>
+								<FormGroup className="mt-3">
+									<FormLabel>Select Country:</FormLabel>
+									<FormControl as="select">
+										<option value="">United States</option>
+										<option value="">Canada</option>
+										<option value="">Mexico</option>
+									</FormControl>
 								</FormGroup>
 							</Col>
 						</Row>
